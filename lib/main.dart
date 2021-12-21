@@ -1,7 +1,8 @@
+import 'package:fablab_project_final_work/auth/login.dart';
 import 'package:flutter/material.dart';
 import 'navigation/bottom_navigation.dart';
 void main() {
-  runApp(const Main());
+  runApp(const Login());
 }
 
 class Main extends StatelessWidget {
