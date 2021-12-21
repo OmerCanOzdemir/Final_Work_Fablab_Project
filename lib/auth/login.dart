@@ -1,3 +1,4 @@
+import 'package:fablab_project_final_work/auth/register.dart';
 import 'package:fablab_project_final_work/decoration/input_decoration.dart';
 import 'package:flutter/material.dart';
 
@@ -41,18 +42,26 @@ class _LoginState extends State<Login> {
                         SizedBox(
                           height: 15,
                         ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.all(16.0),
-                            primary: Colors.white,
-                            textStyle: const TextStyle(fontSize: 20),
+                        Container(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_formkey.currentState!.validate()) {
+                                _formkey.currentState!.save();
+                                print(emailController.text);
+                              }
+                            },
+                            child: Text('Login'),
                           ),
-                          onPressed: () {
-                            print(emailController.text);
-                            print(passwordController.text);
-                          },
-                          child: const Text('Login'),
-                        )
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        TextButton(
+                            onPressed: () {
+                                Navigator.push(context,MaterialPageRoute(builder: (context) => Register()));
+                            },
+                            child: Text('Geen account? Registreer'))
                       ],
                     )))));
   }
@@ -64,6 +73,12 @@ class _LoginState extends State<Login> {
         keyboardType: TextInputType.text,
         decoration: inputDecoration(Icons.email, "Email adres"),
         controller: emailController,
+        validator: (value) {
+          if (value.toString().isEmpty) {
+            return "Email mag niet leeg zijn";
+          } else
+            return null;
+        },
       ),
     );
   }
@@ -74,8 +89,14 @@ class _LoginState extends State<Login> {
       child: TextFormField(
         obscureText: true,
         keyboardType: TextInputType.text,
-        decoration: inputDecoration(Icons.email, "Wachtwoord"),
+        decoration: inputDecoration(Icons.password, "Wachtwoord"),
         controller: passwordController,
+        validator: (value) {
+          if (value.toString().isEmpty) {
+            return "Wachtwoord mag niet leeg zijn";
+          } else
+            return null;
+        },
       ),
     );
   }

@@ -1,8 +1,12 @@
 import 'package:fablab_project_final_work/auth/login.dart';
+import 'package:fablab_project_final_work/wrapper/wrapper.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'navigation/bottom_navigation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 void main() {
-  runApp(const Login());
+  
+  runApp(const Main());
 }
 
 class Main extends StatelessWidget {
@@ -10,9 +14,10 @@ class Main extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+   
     return MaterialApp(
       title: "Fablab project",
-      home: BottomNavigation(),
+      home: Wrapper(),
     );
   }
 }
