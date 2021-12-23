@@ -1,6 +1,9 @@
 import 'package:fablab_project_final_work/auth/register.dart';
 import 'package:fablab_project_final_work/decoration/input_decoration.dart';
+import 'package:fablab_project_final_work/navigation/bottom_navigation.dart';
+import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -18,6 +21,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    AuthService _auth = AuthService();
     return Scaffold(
         body: Center(
             child: SingleChildScrollView(
@@ -47,8 +51,26 @@ class _LoginState extends State<Login> {
                           child: ElevatedButton(
                             onPressed: () async {
                               if (_formkey.currentState!.validate()) {
-                                _formkey.currentState!.save();
-                                print(emailController.text);
+                                dynamic result =
+                                    await _auth.loginWithEmailAndPassword(
+                                        emailController.text,
+                                        passwordController.text);
+                                if (result == "U bent ingelogd") {
+                                  Fluttertoast.showToast(
+                                      msg: result,
+                                      fontSize: 18,
+                                      gravity: ToastGravity.BOTTOM);
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              BottomNavigation()));
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: result.toString(),
+                                      fontSize: 18,
+                                      gravity: ToastGravity.BOTTOM);
+                                }
                               }
                             },
                             child: Text('Login'),
@@ -59,7 +81,10 @@ class _LoginState extends State<Login> {
                         ),
                         TextButton(
                             onPressed: () {
-                                Navigator.push(context,MaterialPageRoute(builder: (context) => Register()));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Register()));
                             },
                             child: Text('Geen account? Registreer'))
                       ],

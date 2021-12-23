@@ -1,5 +1,10 @@
+import 'package:fablab_project_final_work/auth/login.dart';
+import 'package:fablab_project_final_work/navigation/bottom_navigation.dart';
+import 'package:fablab_project_final_work/services/auth.dart';
+import 'package:fablab_project_final_work/services/database.dart';
 import 'package:flutter/material.dart';
 import 'package:fablab_project_final_work/decoration/input_decoration.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Register extends StatefulWidget {
   const Register({Key? key}) : super(key: key);
@@ -9,6 +14,10 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  //Auth service
+  final AuthService _auth = AuthService();
+
+  //form key
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   //input controllers
@@ -45,24 +54,40 @@ class _RegisterState extends State<Register> {
                           height: 15,
                         ),
                         getConfirmPasswordInput(),
-                         SizedBox(
+                        SizedBox(
                           height: 15,
                         ),
                         getFirstnameInput(),
-                         SizedBox(
+                        SizedBox(
                           height: 15,
                         ),
-                        getLastnameInput(), SizedBox(
+                        getLastnameInput(),
+                        SizedBox(
                           height: 15,
                         ),
                         Container(
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              if(_formkey.currentState!.validate()){
-
+                              if (_formkey.currentState!.validate()) {
+                                dynamic result =
+                                    await _auth.registerWithEmailAndPassword(
+                                        emailController.text,
+                                        passwordController.text,
+                                        firstnameController.text,
+                                        lastnameController.text);
+                                if (result == "Account aangemaakt") {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Login()));
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: result,
+                                      fontSize: 18,
+                                      gravity: ToastGravity.BOTTOM);
+                                }
                               }
-
                             },
                             child: Text('Registreer'),
                           ),
@@ -78,7 +103,7 @@ class _RegisterState extends State<Register> {
         keyboardType: TextInputType.text,
         decoration: inputDecoration(Icons.email, "Email adres"),
         controller: emailController,
-         validator: (value) {
+        validator: (value) {
           if (value.toString().isEmpty) {
             return "Email mag niet leeg zijn";
           } else
@@ -95,7 +120,7 @@ class _RegisterState extends State<Register> {
         keyboardType: TextInputType.text,
         decoration: inputDecoration(Icons.person, "Voornaam"),
         controller: firstnameController,
-         validator: (value) {
+        validator: (value) {
           if (value.toString().isEmpty) {
             return "Voornaam mag niet leeg zijn";
           } else
@@ -112,7 +137,7 @@ class _RegisterState extends State<Register> {
         keyboardType: TextInputType.text,
         decoration: inputDecoration(Icons.person, "Naam"),
         controller: lastnameController,
-         validator: (value) {
+        validator: (value) {
           if (value.toString().isEmpty) {
             return "Naam mag niet leeg zijn";
           } else
@@ -130,9 +155,11 @@ class _RegisterState extends State<Register> {
         keyboardType: TextInputType.text,
         decoration: inputDecoration(Icons.password, "Wachtwoord"),
         controller: passwordController,
-         validator: (value) {
+        validator: (value) {
           if (value.toString().isEmpty) {
             return "Wachtwoord mag niet leeg zijn";
+          } else if (value.toString().length < 6) {
+            return "Wachtwoord moet langer zijn dan 6 karakters";
           } else
             return null;
         },
