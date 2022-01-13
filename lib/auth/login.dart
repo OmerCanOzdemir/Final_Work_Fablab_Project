@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({Key key}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
@@ -50,7 +50,7 @@ class _LoginState extends State<Login> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              if (_formkey.currentState!.validate()) {
+                              if (_formkey.currentState.validate()) {
                                 dynamic result =
                                     await _auth.loginWithEmailAndPassword(
                                         emailController.text,

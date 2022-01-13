@@ -3,6 +3,6 @@ class AppUser {
   final String firstname;
   final String lastname;
 
-  AppUser({required this.uid,required this.firstname,required this.lastname});
+  AppUser({ this.uid, this.firstname, this.lastname});
   
 }

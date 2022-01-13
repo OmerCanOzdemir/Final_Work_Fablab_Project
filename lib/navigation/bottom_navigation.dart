@@ -1,9 +1,10 @@
+import 'package:fablab_project_final_work/screens/chatbot.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fablab_project_final_work/screens/home_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({Key? key}) : super(key: key);
+  const BottomNavigation({Key key}) : super(key: key);
 
   @override
   _BottomNavigationState createState() => _BottomNavigationState();
@@ -15,7 +16,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   List<Widget> _widgetOptions = <Widget>[
     Home(),
-    Text("Messages"),
+    ChatbotScreen(),
     Text("Profile")
   ];
 
@@ -36,7 +37,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: "Messages"),
+          BottomNavigationBarItem(icon: Icon(Icons.message), label: "Chatbot"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
         currentIndex: _selectedItem,

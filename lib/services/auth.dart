@@ -12,7 +12,7 @@ class AuthService {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       await _databaseServices.createUser(
-          userCredential.user!.uid, firstname, lastname);
+          userCredential.user.uid, firstname, lastname);
       return "Account aangemaakt";
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {

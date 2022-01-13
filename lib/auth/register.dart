@@ -7,7 +7,7 @@ import 'package:fablab_project_final_work/decoration/input_decoration.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Register extends StatefulWidget {
-  const Register({Key? key}) : super(key: key);
+  const Register({Key key}) : super(key: key);
 
   @override
   _RegisterState createState() => _RegisterState();
@@ -69,7 +69,7 @@ class _RegisterState extends State<Register> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              if (_formkey.currentState!.validate()) {
+                              if (_formkey.currentState.validate()) {
                                 dynamic result =
                                     await _auth.registerWithEmailAndPassword(
                                         emailController.text,
