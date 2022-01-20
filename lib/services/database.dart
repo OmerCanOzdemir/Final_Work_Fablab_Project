@@ -24,9 +24,12 @@ class DatabaseServices {
       "joinedPersons": [userUid]
     });
   }
-  Future<void> addPersonToProject(List persons,String id)async{
-    return await projectCollection.doc(id).update({
-      "joinedPersons": persons
-    });
+
+  Future<void> addPersonToProject(List persons, String id) async {
+    return await projectCollection.doc(id).update({"joinedPersons": persons});
+  }
+
+  Future<void> deleteProject(String id) async {
+    return await projectCollection.doc(id).delete();
   }
 }

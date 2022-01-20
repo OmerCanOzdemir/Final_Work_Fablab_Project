@@ -51,11 +51,15 @@ class Homebody extends StatelessWidget {
           return ListView.builder(
             itemCount: data.size,
             itemBuilder: (context, index) {
-              
               var persons = [];
               for (var person in data.docs[index]['joinedPersons']) {
                 persons.add(person);
               }
+              var own_project = false;
+              if (user.uid == data.docs[index]['author']) {
+                own_project = true;
+              }
+
               return Container(
                   child: Padding(
                 padding: EdgeInsets.all(10.0),
@@ -109,15 +113,32 @@ class Homebody extends StatelessWidget {
                                   msg: "Je bent deel in het project",
                                   fontSize: 18,
                                   gravity: ToastGravity.BOTTOM);
+                            } else if (persons.length ==
+                                data.docs[index]['maxPerson']) {
+                              Fluttertoast.showToast(
+                                  msg: "Project zit momenteel vol",
+                                  fontSize: 18,
+                                  gravity: ToastGravity.BOTTOM);
                             } else {
                               persons.add(uid);
-                              
-                          
+
                               await _databaseServices.addPersonToProject(
                                   persons, data.docs[index].id);
                             }
                           },
                           child: Text("Deelmenen"),
+                        ),
+                      ),
+                      Center(
+                        child: Visibility(
+                          visible: own_project,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await _databaseServices
+                                  .deleteProject(data.docs[index].id);
+                            },
+                            child: Text("Verwijder project"),
+                          ),
                         ),
                       )
                     ],
