@@ -13,7 +13,7 @@ class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     User user = FirebaseAuth.instance.currentUser;
-  
+    
     if (user == null) {
       return Login();
     } else {

@@ -47,9 +47,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
         await AuthGoogle(fileJson: "assets/chatbotservice.json").build();
     Dialogflow dialogflow =
         Dialogflow(authGoogle: authGoogle, language: Language.english);
-    print(dialogflow);
     AIResponse response = await dialogflow.detectIntent(query);
-    print(response);
     ChatMessage message = new ChatMessage(
       text: response.getMessage() ??
           new CardDialogflow(response.getListMessage()[0]).title,
