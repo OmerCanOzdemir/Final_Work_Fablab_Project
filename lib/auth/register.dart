@@ -39,8 +39,8 @@ class _RegisterState extends State<Register> {
                       children: [
                         CircleAvatar(
                           radius: 70,
-                          child: Image.network(
-                              "https://protocoderspoint.com/wp-content/uploads/2020/10/PROTO-CODERS-POINT-LOGO-water-mark-.png"),
+                          child: Image.asset(
+                              "assets/discord.png"),
                         ),
                         SizedBox(
                           height: 15,

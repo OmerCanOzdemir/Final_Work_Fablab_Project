@@ -9,8 +9,12 @@ class DatabaseServices {
       FirebaseFirestore.instance.collection('project');
 
   Future<void> createUser(String uid, String firstname, String lastname) async {
-    return await userCollection.doc(uid).set(
-        {'firstname': firstname, 'lastname': lastname, "Joined projects": []});
+    return await userCollection.doc(uid).set({
+      'firstname': firstname,
+      'lastname': lastname,
+      "Degree": "Toegepaste informatica",
+      "joined projects": []
+    });
   }
 
   Future<void> createProject(String userUid, String title,
@@ -25,8 +29,12 @@ class DatabaseServices {
     });
   }
 
-  Future<void> addPersonToProject(List persons, String id) async {
-    return await projectCollection.doc(id).update({"joinedPersons": persons});
+  Future<void> addPersonToProject(List persons, String id, String uid) async {
+    List<dynamic> ids = [id];
+    await projectCollection.doc(id).update({"joinedPersons": persons});
+    await userCollection
+        .doc(uid)
+        .update({"joined projects": FieldValue.arrayUnion(ids)});
   }
 
   Future<void> deleteProject(String id) async {

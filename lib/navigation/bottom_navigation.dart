@@ -1,4 +1,5 @@
 import 'package:fablab_project_final_work/screens/chatbot.dart';
+import 'package:fablab_project_final_work/screens/profile_screen.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fablab_project_final_work/screens/home_screen.dart';
@@ -17,7 +18,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
   List<Widget> _widgetOptions = <Widget>[
     Home(),
     ChatbotScreen(),
-    Text("Profile")
+   Profile()
   ];
 
   void _onItemTap(int index) {

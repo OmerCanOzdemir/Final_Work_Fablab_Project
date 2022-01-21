@@ -14,7 +14,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
   final List<ChatMessage> _messages = <ChatMessage>[];
   final TextEditingController _textController = new TextEditingController();
 
-  Widget _buildTextComposer() {
+  Widget sendMessageInput() {
     return new IconTheme(
       data: new IconThemeData(color: Theme.of(context).accentColor),
       child: new Container(
@@ -24,7 +24,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
             new Flexible(
               child: new TextField(
                 controller: _textController,
-                onSubmitted: _handleSubmitted,
+                onSubmitted: sendMyMessage,
                 decoration:
                     new InputDecoration.collapsed(hintText: "Send a message"),
               ),
@@ -33,7 +33,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
               margin: new EdgeInsets.symmetric(horizontal: 4.0),
               child: new IconButton(
                   icon: new Icon(Icons.send),
-                  onPressed: () => _handleSubmitted(_textController.text)),
+                  onPressed: () => sendMyMessage(_textController.text)),
             ),
           ],
         ),
@@ -41,7 +41,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
     );
   }
 
-  void Response(query) async {
+  void ResponseChatbot(query) async {
     _textController.clear();
     AuthGoogle authGoogle =
         await AuthGoogle(fileJson: "assets/chatbotservice.json").build();
@@ -59,7 +59,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
     });
   }
 
-  void _handleSubmitted(String text) {
+  void sendMyMessage(String text) {
     _textController.clear();
     ChatMessage message = new ChatMessage(
       text: text,
@@ -69,7 +69,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
     setState(() {
       _messages.insert(0, message);
     });
-    Response(text);
+    ResponseChatbot(text);
   }
 
   @override
@@ -86,7 +86,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
         new Divider(height: 1.0),
         new Container(
           decoration: new BoxDecoration(color: Theme.of(context).cardColor),
-          child: _buildTextComposer(),
+          child: sendMessageInput(),
         ),
       ]),
     );
@@ -100,7 +100,7 @@ class ChatMessage extends StatelessWidget {
   final String name;
   final bool type;
 
-  List<Widget> otherMessage(context) {
+  List<Widget> chatbotMessage(context) {
     return <Widget>[
       new Container(
         margin: const EdgeInsets.only(right: 16.0),
@@ -153,7 +153,7 @@ class ChatMessage extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 10.0),
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: this.type ? myMessage(context) : otherMessage(context),
+        children: this.type ? myMessage(context) : chatbotMessage(context),
       ),
     );
   }

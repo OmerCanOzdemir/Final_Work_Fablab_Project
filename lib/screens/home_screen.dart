@@ -12,7 +12,6 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AuthService auth = AuthService();
-    //auth.signOut();
     return Scaffold(
         body: Homebody(),
         floatingActionButton: FloatingActionButton(
@@ -123,7 +122,7 @@ class Homebody extends StatelessWidget {
                               persons.add(uid);
 
                               await _databaseServices.addPersonToProject(
-                                  persons, data.docs[index].id);
+                                  persons, data.docs[index].id,user.uid);
                             }
                           },
                           child: Text("Deelmenen"),
