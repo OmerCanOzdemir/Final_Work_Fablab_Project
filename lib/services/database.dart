@@ -8,12 +8,14 @@ class DatabaseServices {
   final CollectionReference projectCollection =
       FirebaseFirestore.instance.collection('project');
 
-  Future<void> createUser(String uid, String firstname, String lastname) async {
+  Future<void> createUser(String uid, String firstname, String lastname,
+      String degree, String url) async {
     return await userCollection.doc(uid).set({
       'firstname': firstname,
       'lastname': lastname,
-      "Degree": "Toegepaste informatica",
-      "joined projects": []
+      "degree": degree,
+      "joined projects": [],
+      "image": url
     });
   }
 
@@ -39,5 +41,14 @@ class DatabaseServices {
 
   Future<void> deleteProject(String id) async {
     return await projectCollection.doc(id).delete();
+  }
+
+  Future<void> updataProject(String id, String title, String description,
+      String littleDescription) async {
+    await projectCollection.doc(id).update({
+      "title": title,
+      "description":description,
+      "littleDescription":littleDescription
+    });
   }
 }

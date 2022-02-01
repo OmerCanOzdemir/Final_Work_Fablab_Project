@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fablab_project_final_work/screens/add_project_screen.dart';
+import 'package:fablab_project_final_work/screens/updata_project_screen.dart';
 import 'package:fablab_project_final_work/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -112,8 +113,9 @@ class Homebody extends StatelessWidget {
                                   msg: "Je bent deel in het project",
                                   fontSize: 18,
                                   gravity: ToastGravity.BOTTOM);
-                            } else if (persons.length ==
+                            } else if (persons.length.toString() ==
                                 data.docs[index]['maxPerson']) {
+                              print("ik ben erin");
                               Fluttertoast.showToast(
                                   msg: "Project zit momenteel vol",
                                   fontSize: 18,
@@ -122,7 +124,7 @@ class Homebody extends StatelessWidget {
                               persons.add(uid);
 
                               await _databaseServices.addPersonToProject(
-                                  persons, data.docs[index].id,user.uid);
+                                  persons, data.docs[index].id, user.uid);
                             }
                           },
                           child: Text("Deelmenen"),
@@ -139,7 +141,21 @@ class Homebody extends StatelessWidget {
                             child: Text("Verwijder project"),
                           ),
                         ),
-                      )
+                      ),
+                      Center(
+                        child: Visibility(
+                          visible: own_project,
+                          child: ElevatedButton(
+                            onPressed: () {
+                             Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => UpdataProject(id:data.docs[index].id,))); 
+                            },
+                            child: Text("Project aanpassen"),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

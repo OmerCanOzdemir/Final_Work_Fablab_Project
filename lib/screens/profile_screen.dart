@@ -16,6 +16,7 @@ class _ProfileState extends State<Profile> {
 
   var firstname;
   var lastname;
+  var imageUrl;
   Future<void> getUserInfo() async {
     firstname = await FirebaseFirestore.instance
         .collection("users")
@@ -28,6 +29,12 @@ class _ProfileState extends State<Profile> {
         .doc(user.uid)
         .get()
         .then((value) => lastname = value.get("lastname").toString());
+
+    imageUrl = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .get()
+        .then((value) => imageUrl = value.get('image').toString());
   }
 
   @override
@@ -54,7 +61,7 @@ class _ProfileState extends State<Profile> {
                     child: CircleAvatar(
                       radius: 70,
                       backgroundColor: Colors.white,
-                      backgroundImage: AssetImage("assets/discord.png"),
+                      backgroundImage: NetworkImage(imageUrl),
                     ),
                   )
                 ],

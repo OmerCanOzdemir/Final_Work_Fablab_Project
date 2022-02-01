@@ -7,12 +7,12 @@ class AuthService {
   final DatabaseServices _databaseServices = DatabaseServices();
   //Register in with email and password
   Future registerWithEmailAndPassword(
-      String email, String password, String firstname, String lastname) async {
+      String email, String password, String firstname, String lastname,String degree,String url) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       await _databaseServices.createUser(
-          userCredential.user.uid, firstname, lastname);
+          userCredential.user.uid, firstname, lastname,degree,url);
       return "Account aangemaakt";
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {

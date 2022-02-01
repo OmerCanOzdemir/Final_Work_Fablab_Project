@@ -1,10 +1,16 @@
-import 'package:fablab_project_final_work/auth/login.dart';
+import 'dart:io';
+
 import 'package:fablab_project_final_work/navigation/bottom_navigation.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:fablab_project_final_work/services/database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fablab_project_final_work/decoration/input_decoration.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'login.dart';
 
 class Register extends StatefulWidget {
   const Register({Key key}) : super(key: key);
@@ -14,9 +20,19 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  //Firebase storage
+  final firebaseStorage = FirebaseStorage.instance;
   //Auth service
   final AuthService _auth = AuthService();
-
+  //Dropdown items
+  final items = [
+    "Toegepaste Informatica",
+    "Graduaat Programmeren",
+    "Graduaat Internet of Things",
+    "Graduaat Systeem- & Netwerkbeheer"
+  ];
+  String value = "Toegepaste Informatica";
+  File file;
   //form key
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
@@ -39,8 +55,7 @@ class _RegisterState extends State<Register> {
                       children: [
                         CircleAvatar(
                           radius: 70,
-                          child: Image.asset(
-                              "assets/discord.png"),
+                          child: Image.asset("assets/discord.png"),
                         ),
                         SizedBox(
                           height: 15,
@@ -65,17 +80,46 @@ class _RegisterState extends State<Register> {
                         SizedBox(
                           height: 15,
                         ),
+                        getDropdownItems(),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Container(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              pickImage();
+                            },
+                            child: Text("Afbeelding"),
+                          ),
+                        ), SizedBox(
+                          height: 15,
+                        ),
                         Container(
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              if (_formkey.currentState.validate()) {
+                              if (file == null) {
+                                Fluttertoast.showToast(
+                                    msg: "Kies een profiel photo",
+                                    fontSize: 18,
+                                    gravity: ToastGravity.BOTTOM);
+                              } else if (_formkey.currentState.validate()) {
+                                var snapshot = await firebaseStorage
+                                    .ref()
+                                    .child('imageuser/'+emailController.text)
+                                    .putFile(file);
+
+                                var url = await snapshot.ref.getDownloadURL();
+
                                 dynamic result =
                                     await _auth.registerWithEmailAndPassword(
                                         emailController.text,
                                         passwordController.text,
                                         firstnameController.text,
-                                        lastnameController.text);
+                                        lastnameController.text,
+                                        value,
+                                        url);
                                 if (result == "Account aangemaakt") {
                                   Navigator.push(
                                       context,
@@ -83,7 +127,7 @@ class _RegisterState extends State<Register> {
                                           builder: (context) => Login()));
                                 } else {
                                   Fluttertoast.showToast(
-                                      msg: result,
+                                      msg: "Some problems",
                                       fontSize: 18,
                                       gravity: ToastGravity.BOTTOM);
                                 }
@@ -94,6 +138,20 @@ class _RegisterState extends State<Register> {
                         )
                       ],
                     )))));
+  }
+
+  Future pickImage() async {
+    try {
+      final image = await ImagePicker().getImage(source: ImageSource.gallery);
+
+      if (image == null) return;
+      final imageTemporary = File(image.path);
+      setState(() {
+        this.file = imageTemporary;
+      });
+    } on PlatformException catch (e) {
+      print("Failed to image pick: " + e.toString());
+    }
   }
 
   Widget getEmailInput() {
@@ -186,4 +244,28 @@ class _RegisterState extends State<Register> {
       ),
     );
   }
+
+  Widget getDropdownItems() {
+    return Container(
+      margin: EdgeInsets.all(16),
+      padding: EdgeInsets.only(bottom: 15, left: 10, right: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30.0),
+        border: Border.all(color: Colors.blue, width: 1.5),
+      ),
+      child: DropdownButton<String>(
+        items: items.map(buildMenuItem).toList(),
+        onChanged: (value) => setState(() => this.value = value),
+        value: this.value,
+        isExpanded: true,
+      ),
+    );
+  }
+
+  DropdownMenuItem<String> buildMenuItem(String item) => DropdownMenuItem(
+      value: item,
+      child: Text(
+        item,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      ));
 }
