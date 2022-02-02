@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fablab_project_final_work/auth/login.dart';
+import 'package:fablab_project_final_work/screens/joined_projects_screen.dart';
+import 'package:fablab_project_final_work/screens/my_projects_screen.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +75,28 @@ class _ProfileState extends State<Profile> {
                 title: Text(firstname + " " + lastname),
                 subtitle: Text("Toegepaste informatica"),
               ),
+                 FlatButton.icon(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MyProjects()));
+                },
+                icon: Icon(Icons.construction),
+                label: Text(
+                  "Mijn projecten",
+                ),
+                color: Colors.blue,
+              ),
+                   FlatButton.icon(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => JoinedProjects()));
+                },
+                icon: Icon(Icons.construction),
+                label: Text(
+                  "Deelgenomen projecten",
+                ),
+                color: Colors.blue,
+              ),
               FlatButton.icon(
                 onPressed: () {
                   AuthService auth = AuthService();
@@ -85,7 +109,9 @@ class _ProfileState extends State<Profile> {
                   "Uitloggen",
                 ),
                 color: Colors.red,
-              )
+              ),     
+              
+           
             ],
           );
         }

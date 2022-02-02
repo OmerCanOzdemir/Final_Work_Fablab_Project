@@ -1,38 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fablab_project_final_work/screens/add_project_screen.dart';
 import 'package:fablab_project_final_work/screens/updata_project_screen.dart';
+import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:fablab_project_final_work/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../services/auth.dart';
 
-class Home extends StatelessWidget {
-  const Home({Key key}) : super(key: key);
+class MyProjects extends StatelessWidget {
+  const MyProjects({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    AuthService auth = AuthService();
     return Scaffold(
-        body: Homebody(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => addProjectScreen()));
-          },
-          child: Icon(Icons.add),
-        ));
+      appBar: AppBar(
+        title: Text("Mijn Projecten"),
+        centerTitle: true,
+      ),
+      body: MyProjectsBody(),
+    );
   }
 }
 
-class Homebody extends StatelessWidget {
+class MyProjectsBody extends StatelessWidget {
   User user = FirebaseAuth.instance.currentUser;
   //Database service
   final DatabaseServices _databaseServices = DatabaseServices();
+
   @override
   Widget build(BuildContext context) {
-    Stream<QuerySnapshot> projects =
-        FirebaseFirestore.instance.collection('project').snapshots();
+    Stream<QuerySnapshot> projects = FirebaseFirestore.instance
+        .collection('project')
+        .where('author', isEqualTo: user.uid)
+        .snapshots();
     return Container(
       child: StreamBuilder<QuerySnapshot>(
         stream: projects,
@@ -47,10 +46,11 @@ class Homebody extends StatelessWidget {
             return Text("Loading");
           }
           final data = snapshot.requireData;
-
+          
           return ListView.builder(
             itemCount: data.size,
             itemBuilder: (context, index) {
+             
               var persons = [];
               for (var person in data.docs[index]['joinedPersons']) {
                 persons.add(person);
@@ -103,32 +103,7 @@ class Homebody extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final uid = user.uid;
-
-                            if (persons.contains(uid)) {
-                              Fluttertoast.showToast(
-                                  msg: "Je bent deel in het project",
-                                  fontSize: 18,
-                                  gravity: ToastGravity.BOTTOM);
-                            } else if (persons.length.toString() ==
-                                data.docs[index]['maxPerson']) {
-                              Fluttertoast.showToast(
-                                  msg: "Project zit momenteel vol",
-                                  fontSize: 18,
-                                  gravity: ToastGravity.BOTTOM);
-                            } else {
-                              persons.add(uid);
-
-                              await _databaseServices.addPersonToProject(
-                                  persons, data.docs[index].id, user.uid);
-                            }
-                          },
-                          child: Text("Deelmenen"),
-                        ),
-                      ),
+               
                       Center(
                         child: Visibility(
                           visible: own_project,
@@ -146,10 +121,12 @@ class Homebody extends StatelessWidget {
                           visible: own_project,
                           child: ElevatedButton(
                             onPressed: () {
-                             Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => UpdataProject(id:data.docs[index].id,))); 
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => UpdataProject(
+                                            id: data.docs[index].id,
+                                          )));
                             },
                             child: Text("Project aanpassen"),
                           ),

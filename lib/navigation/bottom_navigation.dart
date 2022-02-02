@@ -1,4 +1,6 @@
 import 'package:fablab_project_final_work/screens/chatbot.dart';
+import 'package:fablab_project_final_work/screens/joined_projects_screen.dart';
+import 'package:fablab_project_final_work/screens/my_projects_screen.dart';
 import 'package:fablab_project_final_work/screens/profile_screen.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:flutter/material.dart';
@@ -37,9 +39,9 @@ class _BottomNavigationState extends State<BottomNavigation> {
       body: _widgetOptions.elementAt(_selectedItem),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Projecten"),
           BottomNavigationBarItem(icon: Icon(Icons.message), label: "Chatbot"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profiel"),
         ],
         currentIndex: _selectedItem,
         onTap: _onItemTap,
