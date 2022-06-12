@@ -1,19 +1,16 @@
 import 'package:fablab_project_final_work/models/AppUser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'database.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  //Database service
-  final DatabaseServices _databaseServices = DatabaseServices();
+
   //Register in with email and password
   Future registerWithEmailAndPassword(
-      String email, String password, String firstname, String lastname,String degree,String url) async {
+      String email, String password) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      await _databaseServices.createUser(
-          userCredential.user.uid, firstname, lastname,degree,url);
-      return "Account aangemaakt";
+          
+      return userCredential.user.uid;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         return "Zwakke wachtwoord probeer opnieuw";

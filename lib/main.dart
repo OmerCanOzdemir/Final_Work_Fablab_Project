@@ -4,7 +4,6 @@ import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:fablab_project_final_work/wrapper/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'navigation/bottom_navigation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
@@ -22,6 +21,9 @@ class Main extends StatelessWidget {
     return MaterialApp(
         home: Wrapper(),
         title: "Fablab project",
+        theme: ThemeData(
+          dividerColor: Colors.black
+        ),
       );
   }
 }

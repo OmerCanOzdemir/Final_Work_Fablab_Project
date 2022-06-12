@@ -1,20 +1,118 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
+import 'package:fablab_project_final_work/navigation/dashboard.dart';
 import 'package:fablab_project_final_work/screens/add_project_screen.dart';
-import 'package:fablab_project_final_work/screens/updata_project_screen.dart';
-import 'package:fablab_project_final_work/services/database.dart';
+import 'package:fablab_project_final_work/screens/project_details_screen.dart';
+import 'package:fablab_project_final_work/screens/update_project_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../services/auth.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({Key key}) : super(key: key);
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  User user = FirebaseAuth.instance.currentUser;
+  var data;
+  Future<void> inizializeData() async {
+    Response response =
+        await Dio().get("https://finalworkapi.azurewebsites.net/api/Project");
+    data = response.data["projects"];
+  }
 
   @override
   Widget build(BuildContext context) {
     AuthService auth = AuthService();
     return Scaffold(
-        body: Homebody(),
+        appBar: AppBar(title: Text("Projecten")),
+        body: FutureBuilder(
+          future: inizializeData(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              Fluttertoast.showToast(
+                  msg: snapshot.error.toString(),
+                  fontSize: 18,
+                  gravity: ToastGravity.BOTTOM);
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(
+                  semanticsLabel: "Loading",
+                  backgroundColor: Colors.white,
+                ),
+              );
+            }
+
+            return ListView.builder(
+                padding: EdgeInsets.all(16),
+                itemCount: data.length,
+                itemBuilder: (context, index) {
+                  return Visibility(
+                      visible: data[index]["isPublic"],
+                      child: Card(
+                          clipBehavior: Clip.antiAlias,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Column(
+                            children: [
+                              Stack(
+                                children: [
+                                  Ink.image(
+                                    image:
+                                        NetworkImage(data[index]["image_Url"]),
+                                    height: 240,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Positioned(
+                                      bottom: 16,
+                                      right: 16,
+                                      left: 16,
+                                      child: Text(
+                                        data[index]["title"],
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                        ),
+                                      ))
+                                ],
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(16).copyWith(bottom: 0),
+                                child: Text(
+                                  data[index]["coverDescription"],
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
+                              ButtonBar(
+                                alignment: MainAxisAlignment.start,
+                                children: [
+                                  FlatButton(
+                                    child: Text("Meer informatie"),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProjectDetails(
+                                                    projectId: data[index]
+                                                        ["id"],
+                                                  )));
+                                    },
+                                  )
+                                ],
+                              )
+                            ],
+                          )));
+                });
+          },
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(context,
@@ -22,147 +120,5 @@ class Home extends StatelessWidget {
           },
           child: Icon(Icons.add),
         ));
-  }
-}
-
-class Homebody extends StatelessWidget {
-  User user = FirebaseAuth.instance.currentUser;
-  //Database service
-  final DatabaseServices _databaseServices = DatabaseServices();
-  @override
-  Widget build(BuildContext context) {
-    Stream<QuerySnapshot> projects =
-        FirebaseFirestore.instance.collection('project').snapshots();
-    return Container(
-      child: StreamBuilder<QuerySnapshot>(
-        stream: projects,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            Fluttertoast.showToast(
-                msg: snapshot.error.toString(),
-                fontSize: 18,
-                gravity: ToastGravity.BOTTOM);
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text("Loading");
-          }
-          final data = snapshot.requireData;
-
-          return ListView.builder(
-            itemCount: data.size,
-            itemBuilder: (context, index) {
-              var persons = [];
-              for (var person in data.docs[index]['joinedPersons']) {
-                persons.add(person);
-              }
-              var own_project = false;
-              if (user.uid == data.docs[index]['author']) {
-                own_project = true;
-              }
-
-              return Container(
-                  child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  elevation: 16,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        alignment: Alignment.bottomLeft,
-                        children: [
-                          Ink.image(
-                              height: 200,
-                              image: AssetImage('assets/image.png'),
-                              fit: BoxFit.fitWidth)
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 16, top: 16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              data.docs[index]['title'],
-                              style: TextStyle(
-                                  color: Color.fromARGB(137, 22, 22, 22)),
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                              data.docs[index]['littleDescription'],
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                              'Aantal deelnemende personen:${persons.length}/${data.docs[index]['maxPerson']}',
-                              textAlign: TextAlign.left,
-                            )
-                          ],
-                        ),
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final uid = user.uid;
-
-                            if (persons.contains(uid)) {
-                              Fluttertoast.showToast(
-                                  msg: "Je bent deel in het project",
-                                  fontSize: 18,
-                                  gravity: ToastGravity.BOTTOM);
-                            } else if (persons.length.toString() ==
-                                data.docs[index]['maxPerson']) {
-                              Fluttertoast.showToast(
-                                  msg: "Project zit momenteel vol",
-                                  fontSize: 18,
-                                  gravity: ToastGravity.BOTTOM);
-                            } else {
-                              persons.add(uid);
-
-                              await _databaseServices.addPersonToProject(
-                                  persons, data.docs[index].id, user.uid);
-                            }
-                          },
-                          child: Text("Deelmenen"),
-                        ),
-                      ),
-                      Center(
-                        child: Visibility(
-                          visible: own_project,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await _databaseServices
-                                  .deleteProject(data.docs[index].id);
-                            },
-                            child: Text("Verwijder project"),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Visibility(
-                          visible: own_project,
-                          child: ElevatedButton(
-                            onPressed: () {
-                             Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => UpdataProject(id:data.docs[index].id,))); 
-                            },
-                            child: Text("Project aanpassen"),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ));
-            },
-          );
-        },
-      ),
-    );
   }
 }

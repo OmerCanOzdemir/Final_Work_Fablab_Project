@@ -1,145 +1,118 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fablab_project_final_work/screens/updata_project_screen.dart';
-import 'package:fablab_project_final_work/services/database.dart';
+import 'package:dio/dio.dart';
+import 'package:fablab_project_final_work/screens/invitation_screen.dart';
+import 'package:fablab_project_final_work/screens/project_details_screen.dart';
+import 'package:fablab_project_final_work/screens/task_project_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+class JoinedProject extends StatefulWidget {
+  const JoinedProject({Key key}) : super(key: key);
 
-class JoinedProjects extends StatelessWidget {
-  const JoinedProjects({Key key}) : super(key: key);
+  @override
+  _JoinededProjectState createState() => _JoinededProjectState();
+}
+
+class _JoinededProjectState extends State<JoinedProject> {
+  User user = FirebaseAuth.instance.currentUser;
+  var data;
+  Future<void> inizializeData() async {
+    Response response = await Dio().get(
+        "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid);
+
+
+    data = response.data["user"]["joined_Projects"];
+    
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Deelgenomen Projecten"),
-        centerTitle: true,
-      ),
-      body: JoinedProjectsBody(),
-    );
-  }
-}
-
-class JoinedProjectsBody extends StatelessWidget {
-  User user = FirebaseAuth.instance.currentUser;
-  //Database service
-  final DatabaseServices _databaseServices = DatabaseServices();
-
-  @override
-  Widget build(BuildContext context) {
-    Stream<QuerySnapshot> projects = FirebaseFirestore.instance
-        .collection('project')
-        .where('joinedPersons', arrayContains: user.uid)
-        .snapshots();
-    return Container(
-      child: StreamBuilder<QuerySnapshot>(
-        stream: projects,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            Fluttertoast.showToast(
-                msg: snapshot.error.toString(),
-                fontSize: 18,
-                gravity: ToastGravity.BOTTOM);
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Text("Loading");
-          }
-          final data = snapshot.requireData;
-          
-          return ListView.builder(
-            itemCount: data.size,
-            itemBuilder: (context, index) {
-             
-              var persons = [];
-              for (var person in data.docs[index]['joinedPersons']) {
-                persons.add(person);
+        body: FutureBuilder(
+            future: inizializeData(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                Fluttertoast.showToast(
+                    msg: snapshot.error.toString(),
+                    fontSize: 18,
+                    gravity: ToastGravity.BOTTOM);
               }
-              var own_project = false;
-              if (user.uid == data.docs[index]['author']) {
-                own_project = true;
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    semanticsLabel: "Loading",
+                  ),
+                );
               }
-
-              return Container(
-                  child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  elevation: 16,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        alignment: Alignment.bottomLeft,
-                        children: [
-                          Ink.image(
-                              height: 200,
-                              image: AssetImage('assets/image.png'),
-                              fit: BoxFit.fitWidth)
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 16, top: 16),
+              return ListView.builder(
+                  padding: EdgeInsets.all(16),
+                  itemCount: data.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                        clipBehavior: Clip.antiAlias,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              data.docs[index]['title'],
-                              style: TextStyle(
-                                  color: Color.fromARGB(137, 22, 22, 22)),
-                              textAlign: TextAlign.left,
+                            Stack(
+                              children: [
+                                Ink.image(
+                                  image: NetworkImage(data[index]["project"]["image_Url"]),
+                                  height: 240,
+                                  fit: BoxFit.cover,
+                                ),
+                                Positioned(
+                                    bottom: 16,
+                                    right: 16,
+                                    left: 16,
+                                    child: Text(
+                                      data[index]["project"]["title"],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                      ),
+                                    ))
+                              ],
                             ),
-                            Text(
-                              data.docs[index]['littleDescription'],
-                              textAlign: TextAlign.left,
+                            Padding(
+                              padding: EdgeInsets.all(16).copyWith(bottom: 0),
+                              child: Text(
+                                data[index]["project"]["coverDescription"],
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
-                            Text(
-                              'Aantal deelnemende personen:${persons.length}/${data.docs[index]['maxPerson']}',
-                              textAlign: TextAlign.left,
+                            ButtonBar(
+                              alignment: MainAxisAlignment.start,
+                              children: [
+                                FlatButton(
+                                  child: Text("Meer informatie"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ProjectDetails(projectId: data[index]["project"]["id"],)));
+                                  },
+                                ),
+                                FlatButton(
+                                  child: Text("Bekijk Taken"),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                TaskProject(projectId:data[index]["project"]["id"] ,creator: false,)));
+                                  },
+                                ),
+                               
+                              ],
                             )
                           ],
-                        ),
-                      ),
-               
-                      Center(
-                        child: Visibility(
-                          visible: own_project,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await _databaseServices
-                                  .deleteProject(data.docs[index].id);
-                            },
-                            child: Text("Verwijder project"),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Visibility(
-                          visible: own_project,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => UpdataProject(
-                                            id: data.docs[index].id,
-                                          )));
-                            },
-                            child: Text("Project aanpassen"),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ));
-            },
-          );
-        },
-      ),
-    );
+                        ));
+                  });
+            }));
   }
 }

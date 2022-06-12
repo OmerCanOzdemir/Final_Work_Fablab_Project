@@ -75,6 +75,7 @@ class _ChatbotScreen extends State<ChatbotScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      appBar: AppBar(title: Text("Chatbot")),
       body: new Column(children: <Widget>[
         new Flexible(
             child: new ListView.builder(

@@ -1,6 +1,6 @@
 import 'package:fablab_project_final_work/auth/register.dart';
 import 'package:fablab_project_final_work/decoration/input_decoration.dart';
-import 'package:fablab_project_final_work/navigation/bottom_navigation.dart';
+import 'package:fablab_project_final_work/navigation/dashboard.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -30,11 +30,7 @@ class _LoginState extends State<Login> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircleAvatar(
-                          radius: 70,
-                          child: Image.asset(
-                              "assets/discord.png"),
-                        ),
+                       
                         SizedBox(
                           height: 15,
                         ),
@@ -64,7 +60,7 @@ class _LoginState extends State<Login> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              BottomNavigation()));
+                                              Dashboard()));
                                 } else {
                                   Fluttertoast.showToast(
                                       msg: result.toString(),
