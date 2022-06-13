@@ -94,8 +94,6 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),InkWell(
                   onTap: () {
-                    AuthService auth = AuthService();
-                    auth.signOut();
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => MyTasksScreen()));
                   },

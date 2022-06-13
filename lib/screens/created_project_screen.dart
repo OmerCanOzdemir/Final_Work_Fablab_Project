@@ -22,7 +22,6 @@ class _CreatedProjectState extends State<CreatedProject> {
         "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid);
 
     data = response.data["user"]["created_Projects"];
-    print(data);
   }
 
   @override

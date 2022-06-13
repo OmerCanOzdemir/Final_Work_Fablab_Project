@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:fablab_project_final_work/navigation/dashboard.dart';
+import 'package:fablab_project_final_work/screens/add_task_screen.dart';
+import 'package:fablab_project_final_work/screens/handle_taks_screen.dart';
+import 'package:fablab_project_final_work/screens/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +28,6 @@ class TaskProjectState extends State<TaskProject> {
     Response response = await Dio()
         .get("https://finalworkapi.azurewebsites.net/api/Project/" + projectId);
 
-    print(response.data["project"]["tasks"]);
     data = response.data["project"]["tasks"];
   }
 
@@ -57,26 +59,54 @@ class TaskProjectState extends State<TaskProject> {
                   itemBuilder: (context, index) => Card(
                         child: ListTile(
                             title: Text(data[index]["title"]),
-                            subtitle:
-                                Text("Geassigneerd aan:" +"\nStatus: "+ data[index]["status"]),
+                            subtitle: data[index]["user"] == null
+                                ? Text("Status: " + data[index]["status"])
+                                : Text("Status: " +
+                                    data[index]["status"] +
+                                    "\nGeassigneerd aan:" +
+                                    data[index]["user"]["email"]),
                             trailing:
                                 Row(mainAxisSize: MainAxisSize.min, children: [
                               Visibility(
-                                  visible: false, child: Icon(Icons.person)),
+                                  visible: data[index]["user"] != null,
+                                  child: IconButton(
+                                      onPressed: (() {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => Profile(
+                                                      userId: data[index]
+                                                          ["user"]["id"],
+                                                    )));
+                                      }),
+                                      icon: Icon(
+                                        Icons.person,
+                                      ))),
                               Visibility(
-                                  visible: false,
+                                  visible: data[index]["user"] == null,
                                   child: ElevatedButton(
                                     child: Text("Assign to me"),
-                                    onPressed: () {
-                                      print("object");
+                                    onPressed: () async {
+                                      Response response = await Dio().put(
+                                          "https://finalworkapi.azurewebsites.net/api/Tasks/assign/" +
+                                              data[index]["id"] +
+                                              "/" +
+                                              user.uid);
+                                      setState(() {});
                                     },
                                   )),
                               Visibility(
-                                  visible: true,
+                                  visible: creator ||
+                                      data[index]["user"]["id"] == user.uid,
                                   child: ElevatedButton(
-                                    child: Text("Change status"),
+                                    child: Text("Beheer taak"),
                                     onPressed: () {
-                                      print("status changed");
+                                       Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => HandleTaskScreen(
+                                                      taskId: data[index]["id"],
+                                                    )));
                                     },
                                   )),
                             ])),
@@ -88,7 +118,11 @@ class TaskProjectState extends State<TaskProject> {
         child: FloatingActionButton(
           onPressed: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Dashboard()));
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AddTaskToProject(
+                          id: projectId,
+                        )));
           },
           child: Icon(Icons.add),
         ),

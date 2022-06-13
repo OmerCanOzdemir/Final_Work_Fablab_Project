@@ -66,172 +66,182 @@ class _ProfileState extends State<Profile> {
         }
         if (snapshot.connectionState == ConnectionState.done) {
           return Scaffold(
-            appBar: AppBar(title: Text("Profiel"),leading: IconButton(icon: Icon(Icons.arrow_back),onPressed: (){
-               Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Dashboard()));
-            },)),
-            
-            body: Padding(child: ListView(
-              physics: BouncingScrollPhysics(),
-              children: [
-                Center(
-                    child: ClipOval(
-                        child: Material(
-                  color: Colors.transparent,
-                  child: Ink.image(
-                    image: NetworkImage(userData["imageUrl"]),
-                    fit: BoxFit.cover,
-                    width: 128,
-                    height: 128,
-                  ),
-                ))),
-                const SizedBox(height: 24),
-                Column(
+              appBar: AppBar(
+                  title: Text("Profiel"),
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Dashboard()));
+                    },
+                  )),
+              body: Padding(
+                child: ListView(
+                  physics: BouncingScrollPhysics(),
                   children: [
-                    Text(
-                      userData["firstname"] + " " + userData["lastname"],
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    Text(
-                      userData["email"],
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    Text(
-                      userData["education"]["name"],
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    Visibility(
-                        visible: check,
-                        child: ElevatedButton(
-                          child: Text("Profiel aanpassen"),
-                          onPressed: () {
-                            Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProfileUpdate(id:userId,)));
-                          },
-                          style: ElevatedButton.styleFrom(
-                              shape: StadiumBorder(), onPrimary: Colors.white),
-                        )),
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        MaterialButton(
-                          onPressed: () {},
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                createdProjectLength,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 24),
-                              ),
-                              const SizedBox(
-                                height: 2,
-                              ),
-                              Text(
-                                "Gemaakte projecten",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              )
-                            ],
-                          ),
-                        ),
-                        VerticalDivider(),
-                        MaterialButton(
-                          onPressed: () {},
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                joinedProjectLength,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 24),
-                              ),
-                              const SizedBox(
-                                height: 2,
-                              ),
-                              Text(
-                                "Deelgenomen projecten",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 48,
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 48),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Mijn interesses",
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          Text(
-                            interestsUser.join(', '),
-                            style: TextStyle(fontSize: 16, height: 1.5),
-                          ),
-                          SizedBox(
-                            height: 16,
-                          ),
-                          Text(
-                            "Over Mij",
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          Text(
-                            userData["aboutMe"],
-                            style: TextStyle(fontSize: 16, height: 1.5),
-                          ),
-                        ],
+                    Center(
+                        child: ClipOval(
+                            child: Material(
+                      color: Colors.transparent,
+                      child: Ink.image(
+                        image: NetworkImage(userData["imageUrl"]),
+                        fit: BoxFit.cover,
+                        width: 128,
+                        height: 128,
                       ),
+                    ))),
+                    const SizedBox(height: 24),
+                    Column(
+                      children: [
+                        Text(
+                          userData["firstname"] + " " + userData["lastname"],
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 24),
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        Text(
+                          userData["email"],
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        Text(
+                          userData["education"]["name"],
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        Visibility(
+                            visible: check,
+                            child: ElevatedButton(
+                              child: Text("Profiel aanpassen"),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ProfileUpdate(
+                                              id: userId,
+                                            )));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  shape: StadiumBorder(),
+                                  onPrimary: Colors.white),
+                            )),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            MaterialButton(
+                              onPressed: () {},
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    createdProjectLength,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24),
+                                  ),
+                                  const SizedBox(
+                                    height: 2,
+                                  ),
+                                  Text(
+                                    "Gemaakte projecten",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              ),
+                            ),
+                            VerticalDivider(),
+                            MaterialButton(
+                              onPressed: () {},
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    joinedProjectLength,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24),
+                                  ),
+                                  const SizedBox(
+                                    height: 2,
+                                  ),
+                                  Text(
+                                    "Deelgenomen projecten",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 48,
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 48),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Mijn interesses",
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Text(
+                                interestsUser.join(', '),
+                                style: TextStyle(fontSize: 16, height: 1.5),
+                              ),
+                              SizedBox(
+                                height: 16,
+                              ),
+                              Text(
+                                "Over Mij",
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Text(
+                                userData["aboutMe"],
+                                style: TextStyle(fontSize: 16, height: 1.5),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
                     )
                   ],
-                )
-              ],
-            ),padding: EdgeInsets.all(8),)
+                ),
+                padding: EdgeInsets.all(8),
+              ));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Profiel")),
+            body: Center(
+              child: CircularProgressIndicator(
+                semanticsLabel: "Loading",
+                backgroundColor: Colors.white,
+              ),
+            ),
           );
         }
-         if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(
-              appBar: AppBar(title: Text("Profiel")),
-              body: Center(
-              
-              child: CircularProgressIndicator(
-              semanticsLabel: "Loading",
-              backgroundColor: Colors.white,
-            ),
-            ),
-            );
-          }
       },
     );
   }

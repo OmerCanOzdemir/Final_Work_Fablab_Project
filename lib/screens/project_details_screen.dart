@@ -49,7 +49,6 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       creatorAndParticipate = true;
     } else
       creatorAndParticipate = false;
-    print(unparticipate);
   }
 
   @override

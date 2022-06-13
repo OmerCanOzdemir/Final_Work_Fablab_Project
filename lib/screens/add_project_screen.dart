@@ -127,20 +127,17 @@ class _addProjectScreenState extends State<addProjectScreen> {
                                       msg: "Kies een afbeelding",
                                       fontSize: 18,
                                       gravity: ToastGravity.BOTTOM);
-                                }
-                               else  if (value == null) {
+                                } else if (value == null) {
                                   Fluttertoast.showToast(
                                       msg: "Kies een Categorie",
                                       fontSize: 18,
                                       gravity: ToastGravity.BOTTOM);
-                                }
-                                else if (valuePrivateOrNot == null) {
+                                } else if (valuePrivateOrNot == null) {
                                   Fluttertoast.showToast(
                                       msg: "Private of niet?",
                                       fontSize: 18,
                                       gravity: ToastGravity.BOTTOM);
-                                }
-                                else if (_formkey.currentState.validate()) {
+                                } else if (_formkey.currentState.validate()) {
                                   try {
                                     var snapshot = await firebaseStorage
                                         .ref()
@@ -157,8 +154,10 @@ class _addProjectScreenState extends State<addProjectScreen> {
                                       valuePrivateOrNot = true;
                                     } else
                                       valuePrivateOrNot = false;
+                                    print("hallo");
                                     User user =
                                         FirebaseAuth.instance.currentUser;
+                                    print(user);
                                     var projectData = {
                                       "user_Id": user.uid,
                                       "title": titleController.text.toString(),
@@ -179,7 +178,7 @@ class _addProjectScreenState extends State<addProjectScreen> {
                                       }),
                                       data: jsonEncode(projectData),
                                     );
-                                
+                                    print(response);
                                     Fluttertoast.showToast(
                                         msg: "Project aangemaakt",
                                         fontSize: 18,
@@ -338,5 +337,3 @@ class KeyValueModel {
 
   KeyValueModel({this.key, this.value});
 }
-
-
