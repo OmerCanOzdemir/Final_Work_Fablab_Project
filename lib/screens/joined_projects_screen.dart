@@ -18,12 +18,18 @@ class _JoinededProjectState extends State<JoinedProject> {
   User user = FirebaseAuth.instance.currentUser;
   var data;
   Future<void> inizializeData() async {
+    try {
     Response response = await Dio().get(
-        "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid);
-
+        "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid,
+        options: Options(headers: {
+          "authorisation": "00000000-0000-0000-0000-000000000000"
+        }));
 
     data = response.data["user"]["joined_Projects"];
-    
+
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -33,10 +39,9 @@ class _JoinededProjectState extends State<JoinedProject> {
             future: inizializeData(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                Fluttertoast.showToast(
-                    msg: snapshot.error.toString(),
-                    fontSize: 18,
-                    gravity: ToastGravity.BOTTOM);
+                   return Container(
+            child: Text(snapshot.error),
+          );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
@@ -59,7 +64,8 @@ class _JoinededProjectState extends State<JoinedProject> {
                             Stack(
                               children: [
                                 Ink.image(
-                                  image: NetworkImage(data[index]["project"]["image_Url"]),
+                                  image: NetworkImage(
+                                      data[index]["project"]["image_Url"]),
                                   height: 240,
                                   fit: BoxFit.cover,
                                 ),
@@ -94,7 +100,10 @@ class _JoinededProjectState extends State<JoinedProject> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                ProjectDetails(projectId: data[index]["project"]["id"],)));
+                                                ProjectDetails(
+                                                  projectId: data[index]
+                                                      ["project"]["id"],
+                                                )));
                                   },
                                 ),
                                 FlatButton(
@@ -103,11 +112,13 @@ class _JoinededProjectState extends State<JoinedProject> {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                TaskProject(projectId:data[index]["project"]["id"] ,creator: false,)));
+                                            builder: (context) => TaskProject(
+                                                  projectId: data[index]
+                                                      ["project"]["id"],
+                                                  creator: false,
+                                                )));
                                   },
                                 ),
-                               
                               ],
                             )
                           ],

@@ -19,72 +19,83 @@ class _LoginState extends State<Login> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  bool _isloading = false;
+
   @override
   Widget build(BuildContext context) {
     AuthService _auth = AuthService();
     return Scaffold(
-        body: Center(
-            child: SingleChildScrollView(
-                child: Form(
-                    key: _formkey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                       
-                        SizedBox(
-                          height: 15,
-                        ),
-                        getEmailInput(),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        getPasswordInput(),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        Container(
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (_formkey.currentState.validate()) {
-                                dynamic result =
-                                    await _auth.loginWithEmailAndPassword(
-                                        emailController.text,
-                                        passwordController.text);
-                                if (result == "U bent ingelogd") {
-                                  Fluttertoast.showToast(
-                                      msg: result,
-                                      fontSize: 18,
-                                      gravity: ToastGravity.BOTTOM);
+        body: _isloading
+            ? Center(
+                child: CircularProgressIndicator(
+                  semanticsLabel: "Loading",
+                  backgroundColor: Colors.white,
+                ),
+              )
+            : Center(
+                child: SingleChildScrollView(
+                    child: Form(
+                        key: _formkey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 15,
+                            ),
+                            getEmailInput(),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            getPasswordInput(),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Container(
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  if (_formkey.currentState.validate()) {
+                                    setState(() {
+                                      _isloading = true;
+                                    });
+                                    dynamic result =
+                                        await _auth.loginWithEmailAndPassword(
+                                            emailController.text,
+                                            passwordController.text);
+                                    if (result == "U bent ingelogd") {
+                                      Fluttertoast.showToast(
+                                          msg: result,
+                                          fontSize: 18,
+                                          gravity: ToastGravity.BOTTOM);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  Dashboard()));
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: result.toString(),
+                                          fontSize: 18,
+                                          gravity: ToastGravity.BOTTOM);
+                                    }
+                                  }
+                                },
+                                child: Text('Login'),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            TextButton(
+                                onPressed: () {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              Dashboard()));
-                                } else {
-                                  Fluttertoast.showToast(
-                                      msg: result.toString(),
-                                      fontSize: 18,
-                                      gravity: ToastGravity.BOTTOM);
-                                }
-                              }
-                            },
-                            child: Text('Login'),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Register()));
-                            },
-                            child: Text('Geen account? Registreer'))
-                      ],
-                    )))));
+                                          builder: (context) => Register()));
+                                },
+                                child: Text('Geen account? Registreer'))
+                          ],
+                        )))));
   }
 
   Widget getEmailInput() {

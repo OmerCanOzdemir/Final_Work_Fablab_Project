@@ -30,16 +30,23 @@ class _RegisterState extends State<Register> {
   List<dynamic> interests = [];
   List<KeyValueModel> checkBoxDropDownItems = [];
   bool valueInit = true;
+  bool _isloading = false;
   Future<void> inizializeData(bool value) async {
     if (value) {
       dropdownItems = [];
       checkBoxDropDownItems = [];
 
       try {
-        Response educationResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Education");
-        Response interestsResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Category");
+        Response educationResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Education",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
+        Response interestsResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Category",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
 
         educations = educationResponse.data["educations"];
         educations.forEach((element) {
@@ -105,166 +112,185 @@ class _RegisterState extends State<Register> {
       builder: (context, snapshot) {
         //Check for errors
         if (snapshot.hasError) {
-          return Text("Error");
+          return Text(snapshot.error);
+        }
+        if (snapshot.connectionState == ConnectionState.waiting || _isloading) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Registreer")),
+            body: Center(
+              child: CircularProgressIndicator(
+                semanticsLabel: "Loading",
+                backgroundColor: Colors.white,
+              ),
+            ),
+          );
         }
         if (snapshot.connectionState == ConnectionState.done) {
           return Scaffold(
-            appBar: AppBar(title: Text("Registreer")),
-              
-              body: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-                child: SingleChildScrollView(
-                    child: Form(
-                        key: _formkey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getEmailInput(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getPasswordInput(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getConfirmPasswordInput(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getFirstnameInput(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getLastnameInput(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getAboutMeInput(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getDropdownItems(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            getDropDownWithCheckBox(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Container(
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  pickImage();
-                                },
-                                child: Text("Afbeelding"),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            Container(
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  if (file == null) {
-                                    Fluttertoast.showToast(
-                                        msg: "Kies een profiel photo",
-                                        fontSize: 18,
-                                        gravity: ToastGravity.BOTTOM);
-                                  } 
-                                  else if(value == null){
-                                    Fluttertoast.showToast(
-                                        msg: "Kies een opleiding",
-                                        fontSize: 18,
-                                        gravity: ToastGravity.BOTTOM);
-                                  }
-                                  else if (_formkey.currentState.validate()) {
-                                    var snapshot = await firebaseStorage
-                                        .ref()
-                                        .child(
-                                            'imageuser/' + emailController.text)
-                                        .putFile(file);
-
-                                    var url =
-                                        await snapshot.ref.getDownloadURL();
-
-                                    dynamic result = await _auth
-                                        .registerWithEmailAndPassword(
-                                      emailController.text,
-                                      passwordController.text,
-                                    );
-
-                                    if (result != null) {
-                                      try {
-                                        var interestsUser = [];
-                                        selectedItemsInterests
-                                            .forEach((element) {
-                                          interestsUser.add({"category_Id": element});
-                                        });
-
-                                        var data = {
-                                          "id": result.toString(),
-                                          "firstname": firstnameController.text,
-                                          "lastname": lastnameController.text,
-                                          "email": emailController.text,
-                                          "imageUrl": url,
-                                          "education_Id": this.value,
-                                          "aboutMe": aboutMeController.text,
-                                          "interests": interestsUser
-                                        };
-                                        
-                                        Response response = await Dio().post(
-                                          "https://finalworkapi.azurewebsites.net/api/User",
-                                          options: Options(headers: {
-                                            HttpHeaders.contentTypeHeader:
-                                                "application/json",
-                                          }),
-                                          data: jsonEncode(data),
-                                        );
-                                        print(response);
-                                      } catch (e) {
-                                        print(e);
-                                      }
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Login()));
-                                    } else {
-                                      Fluttertoast.showToast(
-                                          msg: "Some problems",
-                                          fontSize: 18,
-                                          gravity: ToastGravity.BOTTOM);
-                                    }
-                                  }
-                                },
-                                child: Text('Registreer'),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 15,
-                            ),
-                          ],
-                        )))),
-          ));
-        }
-         if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(
               appBar: AppBar(title: Text("Registreer")),
-              body: Center(
-              
-              child: CircularProgressIndicator(
-              semanticsLabel: "Loading",
-              backgroundColor: Colors.white,
-            ),
-            ),
-            );
-          }
+              body: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                    child: SingleChildScrollView(
+                        child: Form(
+                            key: _formkey,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getEmailInput(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getPasswordInput(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getConfirmPasswordInput(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getFirstnameInput(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getLastnameInput(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getAboutMeInput(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getDropdownItems(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                getDropDownWithCheckBox(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      pickImage();
+                                    },
+                                    child: Text("Afbeelding"),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      if (file == null) {
+                                        Fluttertoast.showToast(
+                                            msg: "Kies een profiel photo",
+                                            fontSize: 18,
+                                            gravity: ToastGravity.BOTTOM);
+                                      } else if (value == null) {
+                                        Fluttertoast.showToast(
+                                            msg: "Kies een opleiding",
+                                            fontSize: 18,
+                                            gravity: ToastGravity.BOTTOM);
+                                      } else if (_formkey.currentState
+                                          .validate()) {
+                                        setState(() {
+                                          _isloading = true;
+                                          valueInit = false;
+                                        });
+                                        var snapshot = await firebaseStorage
+                                            .ref()
+                                            .child('imageuser/' +
+                                                emailController.text)
+                                            .putFile(file);
+
+                                        var url =
+                                            await snapshot.ref.getDownloadURL();
+
+                                        dynamic result = await _auth
+                                            .registerWithEmailAndPassword(
+                                          emailController.text,
+                                          passwordController.text,
+                                        );
+
+                                        if (result != null) {
+                                          try {
+                                            var interestsUser = [];
+                                            selectedItemsInterests
+                                                .forEach((element) {
+                                              interestsUser.add(
+                                                  {"category_Id": element});
+                                            });
+
+                                            var data = {
+                                              "id": result.toString(),
+                                              "firstname":
+                                                  firstnameController.text,
+                                              "lastname":
+                                                  lastnameController.text,
+                                              "email": emailController.text,
+                                              "imageUrl": url,
+                                              "education_Id": this.value,
+                                              "aboutMe": aboutMeController.text,
+                                              "interests": interestsUser
+                                            };
+
+                                            Response response =
+                                                await Dio().post(
+                                              "https://finalworkapi.azurewebsites.net/api/User",
+                                              options: Options(headers: {
+                                                HttpHeaders.contentTypeHeader:
+                                                    "application/json",
+                                                "authorisation":
+                                                    "00000000-0000-0000-0000-000000000000"
+                                              }),
+                                              data: jsonEncode(data),
+                                            );
+                                            if (response.data["statusCode"] ==
+                                                200) {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          Login()));
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                  msg: response
+                                                      .data["errorMessage"]
+                                                      .toString(),
+                                                  fontSize: 18,
+                                                  gravity: ToastGravity.BOTTOM);
+                                            }
+                                          } catch (e) {
+                                            Fluttertoast.showToast(
+                                                msg: e.toString(),
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                          }
+                                        } else {
+                                          Fluttertoast.showToast(
+                                              msg: "Some problems",
+                                              fontSize: 18,
+                                              gravity: ToastGravity.BOTTOM);
+                                        }
+                                      }
+                                    },
+                                    child: Text('Registreer'),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                              ],
+                            )))),
+              ));
+        }
       },
     );
   }

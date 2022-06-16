@@ -45,12 +45,18 @@ class _UpdateProjectState extends State<UpdateProject> {
     if (value) {
       dropdownItems = [];
       try {
-        Response projectResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Project/" + id);
+        Response projectResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Project/" + id,
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
 
         data = projectResponse.data["project"];
-        Response categoriesResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Category");
+        Response categoriesResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Category",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
         categories = categoriesResponse.data["categories"];
         categories.forEach((element) {
           KeyValueModel model =
@@ -72,9 +78,10 @@ class _UpdateProjectState extends State<UpdateProject> {
     return FutureBuilder(
         future: inizializeData(valueInit),
         builder: (context, snapshot) {
-          // Check for errors
           if (snapshot.hasError) {
-            return Text(snapshot.error);
+            return Container(
+              child: Text(snapshot.error),
+            );
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -125,15 +132,12 @@ class _UpdateProjectState extends State<UpdateProject> {
                                     msg: "Kies een Categorie",
                                     fontSize: 18,
                                     gravity: ToastGravity.BOTTOM);
-                              }
-                              else if (valuePrivateOrNot == null) {
+                              } else if (valuePrivateOrNot == null) {
                                 Fluttertoast.showToast(
                                     msg: "Private of niet?",
                                     fontSize: 18,
                                     gravity: ToastGravity.BOTTOM);
-                              }
-
-                              else if (_formkey.currentState.validate()) {
+                              } else if (_formkey.currentState.validate()) {
                                 if (valuePrivateOrNot == "true") {
                                   valuePrivateOrNot = true;
                                 } else
@@ -151,23 +155,35 @@ class _UpdateProjectState extends State<UpdateProject> {
                                     "isPublic": valuePrivateOrNot
                                   };
                                   Response response = await Dio().put(
-                                    "https://finalworkapi.azurewebsites.net/api/Project/"+ id,
+                                    "https://finalworkapi.azurewebsites.net/api/Project/" +
+                                        id,
                                     options: Options(headers: {
                                       HttpHeaders.contentTypeHeader:
                                           "application/json",
+                                      "authorisation":
+                                          "00000000-0000-0000-0000-000000000000"
                                     }),
                                     data: jsonEncode(projectData),
                                   );
-                                  Fluttertoast.showToast(
-                                      msg: "Project aangepast",
-                                      fontSize: 18,
-                                      gravity: ToastGravity.BOTTOM);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ProjectDetails(
-                                                projectId: data["id"],
-                                              )));
+                                  if (response.data["statusCode" == 200]) {
+                                    Fluttertoast.showToast(
+                                        msg: "Project aangepast",
+                                        fontSize: 18,
+                                        gravity: ToastGravity.BOTTOM);
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ProjectDetails(
+                                                  projectId: data["id"],
+                                                )));
+                                  } else {
+                                    Fluttertoast.showToast(
+                                        msg: response.data["errorMessage"]
+                                            .toString(),
+                                        fontSize: 18,
+                                        gravity: ToastGravity.BOTTOM);
+                                  }
                                 } catch (e) {
                                   Fluttertoast.showToast(
                                       msg: e.toString(),

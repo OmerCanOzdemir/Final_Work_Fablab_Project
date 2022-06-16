@@ -38,23 +38,32 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
   List<dynamic> interests = [];
   List<KeyValueModel> checkBoxDropDownItems = [];
   bool valueInit = true;
-
+  bool _isloading = false;
   Future<void> inizializeData(bool value) async {
     if (value) {
       dropdownItems = [];
       checkBoxDropDownItems = [];
 
       try {
-        Response userResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/User/byId/" + id);
+        Response userResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/User/byId/" + id,
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
         firstnameController.text = userResponse.data["user"]["firstname"];
         lastnameController.text = userResponse.data["user"]["lastname"];
         aboutMeController.text = userResponse.data["user"]["aboutMe"];
 
-        Response educationResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Education");
-        Response interestsResponse = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Category");
+        Response educationResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Education",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
+        Response interestsResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Category",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
 
         educations = educationResponse.data["educations"];
         educations.forEach((element) {
@@ -94,6 +103,7 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
   void _submit() {
     Navigator.pop(context, selectedItemsInterests);
   }
+
   User user = FirebaseAuth.instance.currentUser;
 
   @override
@@ -106,7 +116,8 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
               child: Text(snapshot.error),
             );
           }
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              _isloading) {
             return Scaffold(
               appBar: AppBar(title: Text("Profiel aanpassen")),
               body: Center(
@@ -161,6 +172,10 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
                                                   gravity: ToastGravity.BOTTOM);
                                             } else if (_formkey.currentState
                                                 .validate()) {
+                                              setState(() {
+                                                valueInit = false;
+                                                _isloading = true;
+                                              });
                                               try {
                                                 var interestsUser = [];
                                                 selectedItemsInterests
@@ -178,7 +193,7 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
                                                   "aboutMe":
                                                       aboutMeController.text,
                                                   "interests": interestsUser,
-                                                   "email": user.email
+                                                  "email": user.email
                                                 };
                                                 Response response =
                                                     await Dio().put(
@@ -188,17 +203,29 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
                                                     HttpHeaders
                                                             .contentTypeHeader:
                                                         "application/json",
+                                                    "authorisation":
+                                                        "00000000-0000-0000-0000-000000000000"
                                                   }),
                                                   data: jsonEncode(data),
                                                 );
-                                                print(response);
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Profile(
-                                                              userId: id,
-                                                            )));
+                                                if (response.data[
+                                                    "statusCode" == 200]) {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              Profile(
+                                                                userId: id,
+                                                              )));
+                                                } else {
+                                                  Fluttertoast.showToast(
+                                                      msg: response
+                                                          .data["errorMessage"]
+                                                          .toString(),
+                                                      fontSize: 18,
+                                                      gravity:
+                                                          ToastGravity.BOTTOM);
+                                                }
                                               } catch (e) {
                                                 Fluttertoast.showToast(
                                                     msg: e.toString(),

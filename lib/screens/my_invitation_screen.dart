@@ -19,7 +19,10 @@ class _MyInvitationScreen extends State<MyInvitationScreen> {
   Future<void> inizializeData() async {
     try {
       Response response = await Dio().get(
-          "https://finalworkapi.azurewebsites.net/api/User/byId/" + userId);
+          "https://finalworkapi.azurewebsites.net/api/User/byId/" + userId,
+          options: Options(headers: {
+            "authorisation": "00000000-0000-0000-0000-000000000000"
+          }));
 
       data = response.data["user"]["invitations"];
     } catch (e) {
@@ -76,42 +79,66 @@ class _MyInvitationScreen extends State<MyInvitationScreen> {
                                               "https://finalworkapi.azurewebsites.net/api/UserProject/participate/" +
                                                   user.uid +
                                                   "/" +
-                                                  data[index]["projectId"]);
+                                                  data[index]["projectId"],
+                                              options: Options(headers: {
+                                                "authorisation":
+                                                    "00000000-0000-0000-0000-000000000000"
+                                              }));
                                           await Dio().post(
                                               "https://finalworkapi.azurewebsites.net/api/User/acceptInvitation/" +
-                                                  data[index]["id"]);
-                                          
-                                          Fluttertoast.showToast(
-                                              msg: "Uitnodiging geaccepteerd",
-                                              fontSize: 18,
-                                              gravity: ToastGravity.BOTTOM);
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ProjectDetails(
-                                                        projectId: data[index]
-                                                            ["projectId"],
-                                                      )));
+                                                  data[index]["id"],
+                                              options: Options(headers: {
+                                                "authorisation":
+                                                    "00000000-0000-0000-0000-000000000000"
+                                              }));
+                                          if (response
+                                              .data["statusCode" == 200]) {
+                                            Fluttertoast.showToast(
+                                                msg: "Uitnodiging geaccepteerd",
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ProjectDetails(
+                                                          projectId: data[index]
+                                                              ["projectId"],
+                                                        )));
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: response
+                                                    .data["errorMessage"]
+                                                    .toString(),
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                          }
                                         },
                                         icon: Icon(Icons.done)),
                                     IconButton(
                                         onPressed: () async {
+                                          setState(() {});
                                           Response response = await Dio().post(
                                               "https://finalworkapi.azurewebsites.net/api/User/acceptInvitation/" +
-                                                  data[index]["id"]);
-
-                                          Fluttertoast.showToast(
-                                              msg: "Uitnodiging geweigerd",
-                                              fontSize: 18,
-                                              gravity: ToastGravity.BOTTOM);
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MyInvitationScreen(
-                                                        userId: userId,
-                                                      )));
+                                                  data[index]["id"],
+                                              options: Options(headers: {
+                                                "authorisation":
+                                                    "00000000-0000-0000-0000-000000000000"
+                                              }));
+                                          if (response
+                                              .data["statusCode" == 200]) {
+                                            Fluttertoast.showToast(
+                                                msg: "Uitnodiging geweigerd",
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: response
+                                                    .data["errorMessage"]
+                                                    .toString(),
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                          }
                                         },
                                         icon: Icon(Icons.close)),
                                   ])),

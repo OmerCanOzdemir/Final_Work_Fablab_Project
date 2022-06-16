@@ -26,29 +26,38 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   User user = FirebaseAuth.instance.currentUser;
   String idUnparticipate;
   Future<void> inizializeData() async {
-    print(projectId);
-    Response response = await Dio()
-        .get("https://finalworkapi.azurewebsites.net/api/Project/" + projectId);
+    try {
+      Response response = await Dio().get(
+          "https://finalworkapi.azurewebsites.net/api/Project/" + projectId,
+          options: Options(headers: {
+            "authorisation": "00000000-0000-0000-0000-000000000000"
+          }));
 
-    data = response.data["project"];
-    if (data["user_Id"] == user.uid) {
-      creator = true;
-    } else
-      creator = false;
+      data = response.data["project"];
+      if (data["user_Id"] == user.uid) {
+        creator = true;
+      } else
+        creator = false;
 
-    Response userResponse = await Dio().get(
-        "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid);
+      Response userResponse = await Dio().get(
+          "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid,
+          options: Options(headers: {
+            "authorisation": "00000000-0000-0000-0000-000000000000"
+          }));
 
-    userResponse.data["user"]["joined_Projects"].forEach((element) {
-      if (projectId == element["project_Id"]) {
-        unparticipate = true;
-        idUnparticipate = element["id"];
-      }
-    });
-    if (creator || !unparticipate) {
-      creatorAndParticipate = true;
-    } else
-      creatorAndParticipate = false;
+      userResponse.data["user"]["joined_Projects"].forEach((element) {
+        if (projectId == element["project_Id"]) {
+          unparticipate = true;
+          idUnparticipate = element["id"];
+        }
+      });
+      if (creator || unparticipate) {
+        creatorAndParticipate = true;
+      } else
+        creatorAndParticipate = false;
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -57,10 +66,9 @@ class _ProjectDetailsState extends State<ProjectDetails> {
         future: inizializeData(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            Fluttertoast.showToast(
-                msg: snapshot.error.toString(),
-                fontSize: 18,
-                gravity: ToastGravity.BOTTOM);
+            return Container(
+              child: Text(snapshot.error),
+            );
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -76,7 +84,15 @@ class _ProjectDetailsState extends State<ProjectDetails> {
           }
           if (snapshot.connectionState == ConnectionState.done) {
             return Scaffold(
-              appBar: AppBar(title: Text("Project details")),
+              appBar: AppBar(
+                  title: Text("Project details"),
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Home()));
+                    },
+                  )),
               body: Container(
                 padding: EdgeInsets.all(0),
                 child: ListView(
@@ -132,20 +148,34 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               "https://finalworkapi.azurewebsites.net/api/UserProject/participate/" +
                                                   user.uid +
                                                   "/" +
-                                                  projectId);
-                                          Fluttertoast.showToast(
-                                              msg:
-                                                  "U neemt deel aan het project",
-                                              fontSize: 18,
-                                              gravity: ToastGravity.BOTTOM);
+                                                  projectId,
+                                              options: Options(headers: {
+                                                "authorisation":
+                                                    "00000000-0000-0000-0000-000000000000"
+                                              }));
+                                          if (response
+                                              .data["statusCode" == 200]) {
+                                            Fluttertoast.showToast(
+                                                msg:
+                                                    "U neemt deel aan het project",
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
 
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ProjectDetails(
-                                                        projectId: projectId,
-                                                      )));
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ProjectDetails(
+                                                          projectId: projectId,
+                                                        )));
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: response
+                                                    .data["errorMessage"]
+                                                    .toString(),
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                          }
                                         },
                                       )),
                                   Visibility(
@@ -155,19 +185,33 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                         onPressed: () async {
                                           Response response = await Dio().post(
                                               "https://finalworkapi.azurewebsites.net/api/UserProject/unParticipate/" +
-                                                  idUnparticipate);
-                                          Fluttertoast.showToast(
-                                              msg:
-                                                  "Uit nemen van het project",
-                                              fontSize: 18,
-                                              gravity: ToastGravity.BOTTOM);
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ProjectDetails(
-                                                        projectId: projectId,
-                                                      )));
+                                                  idUnparticipate,
+                                              options: Options(headers: {
+                                                "authorisation":
+                                                    "00000000-0000-0000-0000-000000000000"
+                                              }));
+                                          if (response
+                                              .data["statusCode" == 200]) {
+                                            Fluttertoast.showToast(
+                                                msg:
+                                                    "Uit nemen van het project",
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ProjectDetails(
+                                                          projectId: projectId,
+                                                        )));
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: response
+                                                    .data["errorMessage"]
+                                                    .toString(),
+                                                fontSize: 18,
+                                                gravity: ToastGravity.BOTTOM);
+                                          }
                                         },
                                       )),
                                   FlatButton(
@@ -220,7 +264,6 @@ class _ProjectDetailsState extends State<ProjectDetails> {
               ),
             );
           }
-         
         });
   }
 }

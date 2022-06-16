@@ -27,13 +27,21 @@ class _HandleTaskScreenState extends State<HandleTaskScreen> {
   TextEditingController descriptionController = TextEditingController();
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
   var init = true;
+  bool _isloading = false;
   Future<void> inizializeData(bool init) async {
     if (init) {
-      Response response = await Dio()
-          .get("https://finalworkapi.azurewebsites.net/api/Tasks/" + taskId);
-      data = response.data["task"];
-      titleController.text = data["title"];
-      descriptionController.text = data["description"];
+      try {
+        Response response = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Tasks/" + taskId,
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
+        data = response.data["task"];
+        titleController.text = data["title"];
+        descriptionController.text = data["description"];
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
@@ -45,9 +53,12 @@ class _HandleTaskScreenState extends State<HandleTaskScreen> {
           future: inizializeData(init),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Text("Error");
+                 return Container(
+            child: Text(snapshot.error),
+          );
             }
-            if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.connectionState == ConnectionState.done ||
+                _isloading) {
               return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
@@ -80,6 +91,10 @@ class _HandleTaskScreenState extends State<HandleTaskScreen> {
                                                           ToastGravity.BOTTOM);
                                                 } else if (_formkey.currentState
                                                     .validate()) {
+                                                  setState(() {
+                                                    _isloading = true;
+                                                    init = false;
+                                                  });
                                                   var data = {
                                                     "title":
                                                         titleController.text,
@@ -88,26 +103,40 @@ class _HandleTaskScreenState extends State<HandleTaskScreen> {
                                                             .text,
                                                     "status": value
                                                   };
-                                                  await Dio().put(
+                                                  Response response =
+                                                      await Dio().put(
                                                     "https://finalworkapi.azurewebsites.net/api/Tasks/" +
                                                         taskId,
                                                     options: Options(headers: {
                                                       HttpHeaders
                                                               .contentTypeHeader:
                                                           "application/json",
+                                                      "authorisation":
+                                                          "00000000-0000-0000-0000-000000000000"
                                                     }),
                                                     data: jsonEncode(data),
                                                   );
-                                                  Fluttertoast.showToast(
-                                                      msg: "Taak gewijzigd",
-                                                      fontSize: 18,
-                                                      gravity:
-                                                          ToastGravity.BOTTOM);
-                                                  Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              MyProjects()));
+                                                  if (response.data[
+                                                      "statusCode" == 200]) {
+                                                    Fluttertoast.showToast(
+                                                        msg: "Taak gewijzigd",
+                                                        fontSize: 18,
+                                                        gravity: ToastGravity
+                                                            .BOTTOM);
+                                                    Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                MyProjects()));
+                                                  } else {
+                                                    Fluttertoast.showToast(
+                                                        msg: response.data[
+                                                                "errorMessage"]
+                                                            .toString(),
+                                                        fontSize: 18,
+                                                        gravity: ToastGravity
+                                                            .BOTTOM);
+                                                  }
                                                 }
                                               },
                                               child: Text("Wijzig taak")),
@@ -118,20 +147,35 @@ class _HandleTaskScreenState extends State<HandleTaskScreen> {
                                               style: ElevatedButton.styleFrom(
                                                   primary: Colors.red),
                                               onPressed: () async {
-                                                await Dio().put(
+                                                Response response = await Dio().put(
                                                     "https://finalworkapi.azurewebsites.net/api/Tasks/unAssign/" +
-                                                        taskId);
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        "Doet niet meer deze taak",
-                                                    fontSize: 18,
-                                                    gravity:
-                                                        ToastGravity.BOTTOM);
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            MyProjects()));
+                                                        taskId,
+                                                    options: Options(headers: {
+                                                      "authorisation":
+                                                          "00000000-0000-0000-0000-000000000000"
+                                                    }));
+                                                if (response.data[
+                                                    "statusCode" == 200]) {
+                                                  Fluttertoast.showToast(
+                                                      msg:
+                                                          "Doet niet meer deze taak",
+                                                      fontSize: 18,
+                                                      gravity:
+                                                          ToastGravity.BOTTOM);
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              MyProjects()));
+                                                } else {
+                                                  Fluttertoast.showToast(
+                                                      msg: response
+                                                          .data["errorMessage"]
+                                                          .toString(),
+                                                      fontSize: 18,
+                                                      gravity:
+                                                          ToastGravity.BOTTOM);
+                                                }
                                               },
                                               child: Text("Unassigneer taak"))
                                         ],

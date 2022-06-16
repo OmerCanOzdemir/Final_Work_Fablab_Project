@@ -18,10 +18,18 @@ class _CreatedProjectState extends State<CreatedProject> {
   User user = FirebaseAuth.instance.currentUser;
   var data;
   Future<void> inizializeData() async {
+    try {
     Response response = await Dio().get(
-        "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid);
+        "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid,
+        options: Options(headers: {
+          "authorisation": "00000000-0000-0000-0000-000000000000"
+        }));
 
     data = response.data["user"]["created_Projects"];
+
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -31,10 +39,9 @@ class _CreatedProjectState extends State<CreatedProject> {
             future: inizializeData(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                Fluttertoast.showToast(
-                    msg: snapshot.error.toString(),
-                    fontSize: 18,
-                    gravity: ToastGravity.BOTTOM);
+                   return Container(
+            child: Text(snapshot.error),
+          );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(

@@ -24,28 +24,49 @@ class _InvitationScreen extends State<InvitationScreen> {
   User user = FirebaseAuth.instance.currentUser;
   var data;
   var projectData;
-  Future<void> inizializeData() async {
-    try {
-      Response response =
-          await Dio().get("https://finalworkapi.azurewebsites.net/api/User");
-      data = response.data["users"];
-      data = data.where((item) => item["id"] != user.uid).toList();
-      Response projectResponse = await Dio()
-          .get("https://finalworkapi.azurewebsites.net/api/Project/" + id);
-      projectData = projectResponse.data["project"];
-    } catch (e) {
-      print(e);
+  bool _isloading = false;
+  bool _init = true;
+  Future<void> inizializeData(bool init) async {
+    if (init) {
+      try {
+        Response response = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/User",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
+        data = response.data["users"];
+        data = data.where((item) => item["id"] != user.uid).toList();
+        Response projectResponse = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Project/" + id,
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
+        projectData = projectResponse.data["project"];
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: inizializeData(),
+      future: inizializeData(true),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Container(
             child: Text(snapshot.error),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting || _isloading) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Gebruikers uitnodigen")),
+            body: Center(
+              child: CircularProgressIndicator(
+                semanticsLabel: "Loading",
+                backgroundColor: Colors.white,
+              ),
+            ),
           );
         }
         if (snapshot.connectionState == ConnectionState.done) {
@@ -89,40 +110,41 @@ class _InvitationScreen extends State<InvitationScreen> {
                                       "userId": data[index]["id"],
                                       "projectId": id
                                     };
-
+                                    setState(() {
+                                      _init = false;
+                                      _isloading = true;
+                                    });
                                     Response response = await Dio().post(
                                       "https://finalworkapi.azurewebsites.net/api/User/invite",
                                       options: Options(headers: {
                                         HttpHeaders.contentTypeHeader:
                                             "application/json",
+                                        "authorisation":
+                                            "00000000-0000-0000-0000-000000000000"
                                       }),
                                       data: jsonEncode(dataInvitation),
                                     );
-                                    print(response);
-                                    Fluttertoast.showToast(
-                                        msg: "Gebruiker uitgenodigd",
-                                        fontSize: 18,
-                                        gravity: ToastGravity.BOTTOM);
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                MyProjects()));
+                                    if (response.data["statusCode" == 200]) {
+                                      Fluttertoast.showToast(
+                                          msg: "Gebruiker uitgenodigd",
+                                          fontSize: 18,
+                                          gravity: ToastGravity.BOTTOM);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MyProjects()));
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: response.data["errorMessage"]
+                                              .toString(),
+                                          fontSize: 18,
+                                          gravity: ToastGravity.BOTTOM);
+                                    }
                                   },
                                   icon: Icon(Icons.email)),
                             ])),
                       )));
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            appBar: AppBar(title: Text("Gebruikers uitnodigen")),
-            body: Center(
-              child: CircularProgressIndicator(
-                semanticsLabel: "Loading",
-                backgroundColor: Colors.white,
-              ),
-            ),
-          );
         }
       },
     );

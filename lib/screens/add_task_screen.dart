@@ -25,60 +25,81 @@ class _AddTaskToProjectState extends State<AddTaskToProject> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-
+  bool _isloading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Voeg taak")),
-      body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-              child: SingleChildScrollView(
-                  child: Form(
-                      key: _formkey,
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            getTitleInput(),
-                            SizedBox(
-                              height: 14,
-                            ),
-                            getDescriptionInput(),
-                            Container(
-                                child: ElevatedButton(
-                              child: Text("Voeg taak"),
-                              onPressed: () async {
-                                if (_formkey.currentState.validate()) {
-                                  var taskData = {
-                                    "title": titleController.text,
-                                    "description": descriptionController.text,
-                                    "projectId": id
-                                  };
-                                  Response response = await Dio().post(
-                                    "https://finalworkapi.azurewebsites.net/api/Tasks/" +
-                                        id,
-                                    options: Options(headers: {
-                                      HttpHeaders.contentTypeHeader:
-                                          "application/json",
-                                    }),
-                                    data: jsonEncode(taskData),
-                                  );
-                                  print(response);
-                                  Fluttertoast.showToast(
-                                      msg: "Taak aangemaakt",
-                                      fontSize: 18,
-                                      gravity: ToastGravity.BOTTOM);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => TaskProject(
-                                                projectId: id,
-                                                creator: true,
-                                              )));
-                                }
-                              },
-                            ))
-                          ]))))),
+      body: _isloading
+          ? Center(
+              child: CircularProgressIndicator(
+                semanticsLabel: "Loading",
+                backgroundColor: Colors.white,
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                  child: SingleChildScrollView(
+                      child: Form(
+                          key: _formkey,
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                getTitleInput(),
+                                SizedBox(
+                                  height: 14,
+                                ),
+                                getDescriptionInput(),
+                                Container(
+                                    child: ElevatedButton(
+                                  child: Text("Voeg taak"),
+                                  onPressed: () async {
+                                    if (_formkey.currentState.validate()) {
+                                      setState(() {
+                                        _isloading = true;
+                                      });
+                                      var taskData = {
+                                        "title": titleController.text,
+                                        "description":
+                                            descriptionController.text,
+                                        "projectId": id
+                                      };
+                                      Response response = await Dio().post(
+                                        "https://finalworkapi.azurewebsites.net/api/Tasks/" +
+                                            id,
+                                        options: Options(headers: {
+                                          HttpHeaders.contentTypeHeader:
+                                              "application/json",
+                                          "authorisation":
+                                              "00000000-0000-0000-0000-000000000000"
+                                        }),
+                                        data: jsonEncode(taskData),
+                                      );
+                                      if (response.data["statusCode" == 200]) {
+                                        Fluttertoast.showToast(
+                                            msg: "Taak aangemaakt",
+                                            fontSize: 18,
+                                            gravity: ToastGravity.BOTTOM);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TaskProject(
+                                                      projectId: id,
+                                                      creator: true,
+                                                    )));
+                                      } else {
+                                        Fluttertoast.showToast(
+                                            msg: response.data["errorMessage"]
+                                                .toString(),
+                                            fontSize: 18,
+                                            gravity: ToastGravity.BOTTOM);
+                                      }
+                                    }
+                                  },
+                                ))
+                              ]))))),
     );
   }
 

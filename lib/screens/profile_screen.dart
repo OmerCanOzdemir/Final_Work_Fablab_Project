@@ -32,7 +32,10 @@ class _ProfileState extends State<Profile> {
     try {
       interestsUser = [];
       Response response = await Dio().get(
-          "https://finalworkapi.azurewebsites.net/api/User/byId/" + userId);
+          "https://finalworkapi.azurewebsites.net/api/User/byId/" + userId,
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
       userData = response.data["user"];
 
       createdProjectLength = userData["created_Projects"].length.toString();

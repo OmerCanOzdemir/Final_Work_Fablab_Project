@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fablab_project_final_work/navigation/dashboard.dart';
 import 'package:fablab_project_final_work/screens/handle_taks_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +17,12 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
   User user = FirebaseAuth.instance.currentUser;
   var data;
   Future<void> inizializeData() async {
-    print(user);
     try {
       Response response = await Dio().get(
-          "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid);
+          "https://finalworkapi.azurewebsites.net/api/User/byId/" + user.uid,
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
 
       data = response.data["user"]["tasks"];
     } catch (e) {
@@ -30,12 +33,24 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mijn taken")),
+      appBar: AppBar(title: Text("Mijn taken") ,leading: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Dashboard(
+                                
+                                )));
+                  },
+                )),
       body: FutureBuilder(
           future: inizializeData(),
           builder: ((context, snapshot) {
             if (snapshot.hasError) {
-              print(snapshot.error);
+                 return Container(
+            child: Text(snapshot.error),
+          );
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(

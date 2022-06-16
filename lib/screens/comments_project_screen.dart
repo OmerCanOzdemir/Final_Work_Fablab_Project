@@ -24,11 +24,18 @@ class _CommentProjectScreenState extends State<CommentProjectScreen> {
   @override
   Widget build(BuildContext context) {
     Future<void> inizializeData() async {
-      Response response = await Dio()
-          .get("https://finalworkapi.azurewebsites.net/api/Project/" + id);
+      try {
+
+      Response response = await Dio().get(
+          "https://finalworkapi.azurewebsites.net/api/Project/" + id,
+          options: Options(headers: {
+            "authorisation": "00000000-0000-0000-0000-000000000000"
+          }));
 
       data = response.data["project"]["comments"];
-      
+      } catch (e) {
+        print(e);
+      }
     }
 
     return FutureBuilder(
@@ -42,7 +49,7 @@ class _CommentProjectScreenState extends State<CommentProjectScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(
-                title: Text("Mijn uitnodigingen"),
+                title: Text("Reacties"),
                 leading: IconButton(
                   icon: Icon(Icons.arrow_back),
                   onPressed: () {
@@ -66,26 +73,29 @@ class _CommentProjectScreenState extends State<CommentProjectScreen> {
           if (data.length == 0) {
             return Scaffold(
               floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AddCommentScreen(
-                                id: id,
-                              )));
-                },child: Icon(Icons.add)),
-              appBar: AppBar(title: Text("Meningen"),leading: IconButton(
-                  icon: Icon(Icons.arrow_back),
                   onPressed: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ProjectDetails(
-                                  projectId: id,
+                            builder: (context) => AddCommentScreen(
+                                  id: id,
                                 )));
                   },
-                )),
-              body: Center(child: Text("Geen meningen")),
+                  child: Icon(Icons.add)),
+              appBar: AppBar(
+                  title: Text("Reacties"),
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProjectDetails(
+                                    projectId: id,
+                                  )));
+                    },
+                  )),
+              body: Center(child: Text("Geen reactie")),
             );
           } else
             return Scaffold(
@@ -100,25 +110,37 @@ class _CommentProjectScreenState extends State<CommentProjectScreen> {
                 },
                 child: Icon(Icons.add),
               ),
-              appBar: AppBar(title: Text("Meningen")),
+              appBar: AppBar(
+                  title: Text("Reacties"),
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProjectDetails(
+                                    projectId: id,
+                                  )));
+                    },
+                  )),
               body: ListView.builder(
                   itemCount: data.length,
                   itemBuilder: (context, index) => Card(
                         child: ListTile(
                             title: Text(data[index]["message"]),
-                            subtitle:
-                                Text("Gestuurd door: "+ data[index]["user"]["email"]),
+                            subtitle: Text("Gestuurd door: " +
+                                data[index]["user"]["email"]),
                             trailing:
                                 Row(mainAxisSize: MainAxisSize.min, children: [
                               IconButton(
                                   onPressed: () {
-
                                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Profile(
-                                userId: data[index]["user"]["id"],
-                              )));
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Profile(
+                                                  userId: data[index]["user"]
+                                                      ["id"],
+                                                )));
                                   },
                                   icon: Icon(Icons.person)),
                             ])),

@@ -38,12 +38,16 @@ class _addProjectScreenState extends State<addProjectScreen> {
   List<dynamic> categories = [];
   List<KeyValueModel> dropdownItems = [];
   var data;
+  bool _isloading = false;
   Future<void> inizializeData(bool value) async {
     if (value) {
       dropdownItems = [];
       try {
-        Response response = await Dio()
-            .get("https://finalworkapi.azurewebsites.net/api/Category");
+        Response response = await Dio().get(
+            "https://finalworkapi.azurewebsites.net/api/Category",
+            options: Options(headers: {
+              "authorisation": "00000000-0000-0000-0000-000000000000"
+            }));
         categories = response.data["categories"];
         categories.forEach((element) {
           KeyValueModel model =
@@ -66,7 +70,13 @@ class _addProjectScreenState extends State<addProjectScreen> {
       body: FutureBuilder(
           future: inizializeData(valueInit),
           builder: ((context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.hasError) {
+                   return Container(
+            child: Text(snapshot.error),
+          );
+              }
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                _isloading) {
               return Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(
@@ -138,6 +148,10 @@ class _addProjectScreenState extends State<addProjectScreen> {
                                       fontSize: 18,
                                       gravity: ToastGravity.BOTTOM);
                                 } else if (_formkey.currentState.validate()) {
+                                  setState(() {
+                                    valueInit = false;
+                                    _isloading = true;
+                                  });
                                   try {
                                     var snapshot = await firebaseStorage
                                         .ref()
@@ -147,17 +161,12 @@ class _addProjectScreenState extends State<addProjectScreen> {
 
                                     var url =
                                         await snapshot.ref.getDownloadURL();
-
-                                    print(url);
-
                                     if (valuePrivateOrNot == "true") {
                                       valuePrivateOrNot = true;
                                     } else
                                       valuePrivateOrNot = false;
-                                    print("hallo");
                                     User user =
                                         FirebaseAuth.instance.currentUser;
-                                    print(user);
                                     var projectData = {
                                       "user_Id": user.uid,
                                       "title": titleController.text.toString(),
@@ -175,18 +184,27 @@ class _addProjectScreenState extends State<addProjectScreen> {
                                       options: Options(headers: {
                                         HttpHeaders.contentTypeHeader:
                                             "application/json",
+                                        "authorisation":
+                                            "00000000-0000-0000-0000-000000000000"
                                       }),
                                       data: jsonEncode(projectData),
                                     );
-                                    print(response);
-                                    Fluttertoast.showToast(
-                                        msg: "Project aangemaakt",
-                                        fontSize: 18,
-                                        gravity: ToastGravity.BOTTOM);
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Home()));
+                                    if (response.data["statusCode" == 200]) {
+                                      Fluttertoast.showToast(
+                                          msg: "Project aangemaakt",
+                                          fontSize: 18,
+                                          gravity: ToastGravity.BOTTOM);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Home()));
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: response.data["errorMessage"]
+                                              .toString(),
+                                          fontSize: 18,
+                                          gravity: ToastGravity.BOTTOM);
+                                    }
                                   } catch (e) {
                                     Fluttertoast.showToast(
                                         msg: e.toString(),
