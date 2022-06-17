@@ -76,7 +76,8 @@ class _AddTaskToProjectState extends State<AddTaskToProject> {
                                         }),
                                         data: jsonEncode(taskData),
                                       );
-                                      if (response.data["statusCode" == 200]) {
+                                      if (response
+                                              .data["statusCode"] == 200) {
                                         Fluttertoast.showToast(
                                             msg: "Taak aangemaakt",
                                             fontSize: 18,

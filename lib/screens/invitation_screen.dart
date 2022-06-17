@@ -22,8 +22,8 @@ class _InvitationScreen extends State<InvitationScreen> {
   String id;
   _InvitationScreen(this.id);
   User user = FirebaseAuth.instance.currentUser;
-  var data;
-  var projectData;
+  var data = [];
+  var projectData = {};
   bool _isloading = false;
   bool _init = true;
   Future<void> inizializeData(bool init) async {
@@ -110,10 +110,8 @@ class _InvitationScreen extends State<InvitationScreen> {
                                       "userId": data[index]["id"],
                                       "projectId": id
                                     };
-                                    setState(() {
-                                      _init = false;
-                                      _isloading = true;
-                                    });
+                                    setState(() {});
+
                                     Response response = await Dio().post(
                                       "https://finalworkapi.azurewebsites.net/api/User/invite",
                                       options: Options(headers: {
@@ -124,16 +122,33 @@ class _InvitationScreen extends State<InvitationScreen> {
                                       }),
                                       data: jsonEncode(dataInvitation),
                                     );
-                                    if (response.data["statusCode" == 200]) {
+
+                                    if (response.data["statusCode"] == 200) {
+                                      var emailData = {
+                                        "receiver": data[index]["email"],
+                                        "body":
+                                            "U heeft zojuist een uitnodiging gekregen van: " +
+                                                user.email +
+                                                "\nBeschrijving project: " +
+                                                projectData["description"],
+                                        "subject": "Uitnodiging project: " +
+                                            projectData["title"],
+                                      };
+                                      await Dio().post(
+                                        "https://finalworkapi.azurewebsites.net/api/Email",
+                                        options: Options(headers: {
+                                          HttpHeaders.contentTypeHeader:
+                                              "application/json",
+                                          "authorisation":
+                                              "00000000-0000-0000-0000-000000000000"
+                                        }),
+                                        data: jsonEncode(emailData),
+                                      );
                                       Fluttertoast.showToast(
                                           msg: "Gebruiker uitgenodigd",
                                           fontSize: 18,
                                           gravity: ToastGravity.BOTTOM);
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  MyProjects()));
+                                      Navigator.pop(context);
                                     } else {
                                       Fluttertoast.showToast(
                                           msg: response.data["errorMessage"]

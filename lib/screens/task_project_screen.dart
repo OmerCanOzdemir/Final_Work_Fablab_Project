@@ -112,7 +112,8 @@ class TaskProjectState extends State<TaskProject> {
                                             "authorisation":
                                                 "00000000-0000-0000-0000-000000000000"
                                           }));
-                                      if (response.data["statusCode" == 200]) {
+                                      if (response
+                                              .data["statusCode"] == 200) {
                                         setState(() {});
                                       } else {
                                         Fluttertoast.showToast(

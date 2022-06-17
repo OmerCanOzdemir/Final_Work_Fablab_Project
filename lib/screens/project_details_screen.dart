@@ -154,7 +154,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                                     "00000000-0000-0000-0000-000000000000"
                                               }));
                                           if (response
-                                              .data["statusCode" == 200]) {
+                                              .data["statusCode"] == 200) {
                                             Fluttertoast.showToast(
                                                 msg:
                                                     "U neemt deel aan het project",
@@ -191,7 +191,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                                     "00000000-0000-0000-0000-000000000000"
                                               }));
                                           if (response
-                                              .data["statusCode" == 200]) {
+                                              .data["statusCode"] == 200) {
                                             Fluttertoast.showToast(
                                                 msg:
                                                     "Uit nemen van het project",

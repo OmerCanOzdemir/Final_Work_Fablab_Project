@@ -189,7 +189,8 @@ class _addProjectScreenState extends State<addProjectScreen> {
                                       }),
                                       data: jsonEncode(projectData),
                                     );
-                                    if (response.data["statusCode" == 200]) {
+                                    if (response
+                                              .data["statusCode"] == 200) {
                                       Fluttertoast.showToast(
                                           msg: "Project aangemaakt",
                                           fontSize: 18,

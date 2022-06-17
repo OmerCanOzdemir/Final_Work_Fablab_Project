@@ -77,7 +77,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                                             data: jsonEncode(data),
                                           );
                                           if (response
-                                              .data["statusCode" == 200]) {
+                                              .data["statusCode"] == 200) {
                                             Fluttertoast.showToast(
                                                 msg: "Mening aangemaakt",
                                                 fontSize: 18,

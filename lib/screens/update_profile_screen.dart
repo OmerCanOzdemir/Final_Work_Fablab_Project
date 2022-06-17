@@ -208,8 +208,8 @@ class _ProfileUpdateState extends State<ProfileUpdate> {
                                                   }),
                                                   data: jsonEncode(data),
                                                 );
-                                                if (response.data[
-                                                    "statusCode" == 200]) {
+                                                if (response
+                                              .data["statusCode"] == 200) {
                                                   Navigator.push(
                                                       context,
                                                       MaterialPageRoute(

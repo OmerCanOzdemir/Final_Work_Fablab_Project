@@ -92,7 +92,7 @@ class _MyInvitationScreen extends State<MyInvitationScreen> {
                                                     "00000000-0000-0000-0000-000000000000"
                                               }));
                                           if (response
-                                              .data["statusCode" == 200]) {
+                                              .data["statusCode"] == 200) {
                                             Fluttertoast.showToast(
                                                 msg: "Uitnodiging geaccepteerd",
                                                 fontSize: 18,

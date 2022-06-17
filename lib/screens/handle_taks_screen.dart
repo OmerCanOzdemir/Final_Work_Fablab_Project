@@ -116,8 +116,8 @@ class _HandleTaskScreenState extends State<HandleTaskScreen> {
                                                     }),
                                                     data: jsonEncode(data),
                                                   );
-                                                  if (response.data[
-                                                      "statusCode" == 200]) {
+                                                  if (response
+                                              .data["statusCode"] == 200) {
                                                     Fluttertoast.showToast(
                                                         msg: "Taak gewijzigd",
                                                         fontSize: 18,

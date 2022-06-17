@@ -165,7 +165,8 @@ class _UpdateProjectState extends State<UpdateProject> {
                                     }),
                                     data: jsonEncode(projectData),
                                   );
-                                  if (response.data["statusCode" == 200]) {
+                                  if (response
+                                              .data["statusCode"] == 200) {
                                     Fluttertoast.showToast(
                                         msg: "Project aangepast",
                                         fontSize: 18,

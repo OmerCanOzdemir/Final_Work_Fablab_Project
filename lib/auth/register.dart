@@ -204,6 +204,7 @@ class _RegisterState extends State<Register> {
                                           _isloading = true;
                                           valueInit = false;
                                         });
+
                                         var snapshot = await firebaseStorage
                                             .ref()
                                             .child('imageuser/' +
@@ -254,6 +255,7 @@ class _RegisterState extends State<Register> {
                                             );
                                             if (response.data["statusCode"] ==
                                                 200) {
+      
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
