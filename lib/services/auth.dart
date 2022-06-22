@@ -1,4 +1,3 @@
-import 'package:fablab_project_final_work/models/AppUser.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;

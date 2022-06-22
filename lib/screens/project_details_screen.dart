@@ -22,7 +22,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   var data;
   bool creator;
   bool creatorAndParticipate;
-  bool unparticipate = false;
+  bool unparticipate = true;
   User user = FirebaseAuth.instance.currentUser;
   String idUnparticipate;
   Future<void> inizializeData() async {
@@ -47,14 +47,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
 
       userResponse.data["user"]["joined_Projects"].forEach((element) {
         if (projectId == element["project_Id"]) {
-          unparticipate = true;
+          unparticipate = false;
           idUnparticipate = element["id"];
         }
       });
-      if (creator || unparticipate) {
-        creatorAndParticipate = true;
-      } else
-        creatorAndParticipate = false;
     } catch (e) {
       print(e);
     }
@@ -140,10 +136,13 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                 alignment: MainAxisAlignment.start,
                                 children: [
                                   Visibility(
-                                      visible: creatorAndParticipate,
+                                      visible: (!creator && unparticipate),
                                       child: FlatButton(
                                         child: Text("Neem deel"),
                                         onPressed: () async {
+                                            setState(() {
+                                                  
+                                                });
                                           Response response = await Dio().post(
                                               "https://finalworkapi.azurewebsites.net/api/UserProject/participate/" +
                                                   user.uid +
@@ -153,21 +152,15 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                                 "authorisation":
                                                     "00000000-0000-0000-0000-000000000000"
                                               }));
-                                          if (response
-                                              .data["statusCode"] == 200) {
+                                          if (response.data["statusCode"] ==
+                                              200) {
                                             Fluttertoast.showToast(
                                                 msg:
                                                     "U neemt deel aan het project",
                                                 fontSize: 18,
                                                 gravity: ToastGravity.BOTTOM);
 
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ProjectDetails(
-                                                          projectId: projectId,
-                                                        )));
+                                          
                                           } else {
                                             Fluttertoast.showToast(
                                                 msg: response
@@ -179,10 +172,13 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                         },
                                       )),
                                   Visibility(
-                                      visible: unparticipate,
+                                      visible: (!unparticipate && !creator),
                                       child: FlatButton(
                                         child: Text("Deel uit project"),
                                         onPressed: () async {
+  setState(() {
+                                                  
+                                                });
                                           Response response = await Dio().post(
                                               "https://finalworkapi.azurewebsites.net/api/UserProject/unParticipate/" +
                                                   idUnparticipate,
@@ -190,20 +186,15 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                                 "authorisation":
                                                     "00000000-0000-0000-0000-000000000000"
                                               }));
-                                          if (response
-                                              .data["statusCode"] == 200) {
+                                          if (response.data["statusCode"] ==
+                                              200) {
+                                              
                                             Fluttertoast.showToast(
                                                 msg:
-                                                    "Uit nemen van het project",
+                                                    "U bent uit van het project",
                                                 fontSize: 18,
                                                 gravity: ToastGravity.BOTTOM);
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ProjectDetails(
-                                                          projectId: projectId,
-                                                        )));
+                                           
                                           } else {
                                             Fluttertoast.showToast(
                                                 msg: response
@@ -215,7 +206,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                         },
                                       )),
                                   FlatButton(
-                                    child: Text("Meningen"),
+                                    child: Text("Reacties"),
                                     onPressed: () {
                                       Navigator.push(
                                           context,

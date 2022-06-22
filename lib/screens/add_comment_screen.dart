@@ -29,7 +29,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Voeg mening"),
+        title: Text("Voeg commentaar"),
       ),
       body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -79,7 +79,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                                           if (response
                                               .data["statusCode"] == 200) {
                                             Fluttertoast.showToast(
-                                                msg: "Mening aangemaakt",
+                                                msg: "Commentaar aangemaakt",
                                                 fontSize: 18,
                                                 gravity: ToastGravity.BOTTOM);
                                             Navigator.push(

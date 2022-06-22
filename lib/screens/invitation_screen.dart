@@ -129,7 +129,7 @@ class _InvitationScreen extends State<InvitationScreen> {
                                         "body":
                                             "U heeft zojuist een uitnodiging gekregen van: " +
                                                 user.email +
-                                                "\nBeschrijving project: " +
+                                                "<br>Beschrijving project: " +
                                                 projectData["description"],
                                         "subject": "Uitnodiging project: " +
                                             projectData["title"],

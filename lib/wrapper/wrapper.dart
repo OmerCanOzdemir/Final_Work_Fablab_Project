@@ -1,6 +1,5 @@
 import 'package:fablab_project_final_work/auth/login.dart';
 import 'package:fablab_project_final_work/auth/register.dart';
-import 'package:fablab_project_final_work/models/AppUser.dart';
 import 'package:fablab_project_final_work/navigation/dashboard.dart';
 import 'package:fablab_project_final_work/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
